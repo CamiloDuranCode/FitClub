@@ -1,0 +1,123 @@
+@startuml diagrama_clases_fitclub
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle Bold
+skinparam ArrowColor #444444
+skinparam ClassBorderColor #444444
+
+' ─── Clase base ───────────────────────────────────────────
+abstract class Persona {
+  - cedula: String
+  - nombre: String
+  - telefono: String
+  + getCedula(): String
+  + getNombre(): String
+  + getTelefono(): String
+  + setCedula(cedula: String): void
+  + setNombre(nombre: String): void
+  + setTelefono(telefono: String): void
+}
+
+' ─── Clases que heredan de Persona ───────────────────────
+class Cliente {
+  - fechaNacimiento: LocalDate
+  - direccion: String
+  + getFechaNacimiento(): LocalDate
+  + getDireccion(): String
+  + setFechaNacimiento(fecha: LocalDate): void
+  + setDireccion(direccion: String): void
+}
+
+class Entrenador {
+  - especialidad: String
+  - horario: String
+  + getEspecialidad(): String
+  + getHorario(): String
+  + setEspecialidad(especialidad: String): void
+  + setHorario(horario: String): void
+}
+
+' ─── Clases del dominio ───────────────────────────────────
+class Membresia {
+  - idMembresia: int
+  - tipo: String
+  - fechaInicio: LocalDate
+  - fechaVencimiento: LocalDate
+  + getId(): int
+  + getTipo(): String
+  + getFechaInicio(): LocalDate
+  + getFechaVencimiento(): LocalDate
+  + estaVigente(): boolean
+  + setTipo(tipo: String): void
+  + setFechaInicio(fecha: LocalDate): void
+  + setFechaVencimiento(fecha: LocalDate): void
+}
+
+class Pago {
+  - idPago: int
+  - monto: double
+  - fechaPago: LocalDate
+  - metodoPago: String
+  + getId(): int
+  + getMonto(): double
+  + getFechaPago(): LocalDate
+  + getMetodoPago(): String
+  + setMonto(monto: double): void
+  + setFechaPago(fecha: LocalDate): void
+  + setMetodoPago(metodo: String): void
+}
+
+class Asistencia {
+  - idAsistencia: int
+  - fechaHora: LocalDateTime
+  - observacion: String
+  + getId(): int
+  + getFechaHora(): LocalDateTime
+  + getObservacion(): String
+  + setFechaHora(fechaHora: LocalDateTime): void
+  + setObservacion(observacion: String): void
+}
+
+class Rutina {
+  - idRutina: int
+  - descripcion: String
+  - fechaAsignacion: LocalDate
+  + getId(): int
+  + getDescripcion(): String
+  + getFechaAsignacion(): LocalDate
+  + setDescripcion(descripcion: String): void
+  + setFechaAsignacion(fecha: LocalDate): void
+}
+
+class Progreso {
+  - idProgreso: int
+  - fechaRegistro: LocalDate
+  - peso: double
+  - talla: double
+  - observaciones: String
+  + getId(): int
+  + getFechaRegistro(): LocalDate
+  + getPeso(): double
+  + getTalla(): double
+  + getObservaciones(): String
+  + setPeso(peso: double): void
+  + setTalla(talla: double): void
+  + setObservaciones(observaciones: String): void
+}
+
+' ─── Herencia ─────────────────────────────────────────────
+Persona <|-- Cliente
+Persona <|-- Entrenador
+
+' ─── Asociaciones ─────────────────────────────────────────
+Cliente "1" --> "0..*" Membresia       : tiene
+Cliente "1" --> "0..*" Asistencia      : registra
+Cliente "1" --> "0..*" Rutina          : se le asigna
+Cliente "1" --> "0..*" Progreso        : lleva
+
+Entrenador "1" --> "0..*" Rutina       : diseña
+
+Membresia "1" --> "0..*" Pago          : genera
+Rutina    "1" --> "0..*" Progreso      : referencia
+
+@enduml
