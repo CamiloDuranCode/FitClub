@@ -1,4 +1,5 @@
 package fitclub.view;
 
-public class View {
+public class View
+{
 }
