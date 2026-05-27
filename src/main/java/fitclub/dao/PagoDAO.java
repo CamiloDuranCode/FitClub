@@ -1,5 +1,6 @@
 package fitclub.dao;
 
+import fitclub.model.Pago;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,7 @@ public class PagoDAO implements IPagoDAO {
     @Override
     public void insertar(Pago pago, int membresiaId) {
         String sql = "INSERT INTO pago (membresia_id, monto, fecha_pago, metodo_pago) VALUES (?, ?, ?, ?)";
-        try {
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, membresiaId);
             ps.setDouble(2, pago.getMonto());
             ps.setDate(3, Date.valueOf(pago.getFechaPago()));
@@ -36,8 +36,7 @@ public class PagoDAO implements IPagoDAO {
     @Override
     public void actualizar(Pago pago) {
         String sql = "UPDATE pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
-        try {
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDouble(1, pago.getMonto());
             ps.setDate(2, Date.valueOf(pago.getFechaPago()));
             ps.setString(3, pago.getMetodoPago());
@@ -52,8 +51,7 @@ public class PagoDAO implements IPagoDAO {
     @Override
     public void eliminar(int idPago) {
         String sql = "DELETE FROM pago WHERE id_pago = ?";
-        try {
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idPago);
             ps.executeUpdate();
             System.out.println("Pago eliminado correctamente.");
@@ -65,17 +63,17 @@ public class PagoDAO implements IPagoDAO {
     @Override
     public Pago buscarPorId(int idPago) {
         String sql = "SELECT * FROM pago WHERE id_pago = ?";
-        try {
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idPago);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Pago(
-                        rs.getInt("id_pago"),
-                        rs.getDouble("monto"),
-                        rs.getDate("fecha_pago").toLocalDate(),
-                        rs.getString("metodo_pago")
-                );
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Pago(
+                            rs.getInt("id_pago"),
+                            rs.getDouble("monto"),
+                            rs.getDate("fecha_pago").toLocalDate(),
+                            rs.getString("metodo_pago")
+                    );
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error al buscar pago: " + e.getMessage());
@@ -87,17 +85,17 @@ public class PagoDAO implements IPagoDAO {
     public List<Pago> listarPorMembresia(int membresiaId) {
         List<Pago> lista = new ArrayList<>();
         String sql = "SELECT * FROM pago WHERE membresia_id = ?";
-        try {
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, membresiaId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                lista.add(new Pago(
-                        rs.getInt("id_pago"),
-                        rs.getDouble("monto"),
-                        rs.getDate("fecha_pago").toLocalDate(),
-                        rs.getString("metodo_pago")
-                ));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Pago(
+                            rs.getInt("id_pago"),
+                            rs.getDouble("monto"),
+                            rs.getDate("fecha_pago").toLocalDate(),
+                            rs.getString("metodo_pago")
+                    ));
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error al listar pagos: " + e.getMessage());
