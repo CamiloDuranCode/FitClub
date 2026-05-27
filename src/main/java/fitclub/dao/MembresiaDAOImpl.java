@@ -1,5 +1,7 @@
 package fitclub.dao;
 
+import fitclub.model.Membresia;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,7 @@
 package fitclub.dao;
 
+import fitclub.model.Membresia;
+
 import java.util.List;
 
 public interface MembresiaDAO {
