@@ -1,5 +1,7 @@
 package fitclub.dao;
 
+import fitclub.model.Cliente;
+
 import java.util.List;
 
 
