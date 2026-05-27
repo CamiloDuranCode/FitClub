@@ -1,5 +1,7 @@
 package fitclub.dao;
 
+import fitclub.model.Pago;
+
 import java.util.List;
 
 
