@@ -6,9 +6,12 @@ import java.time.LocalDate;
  * Representa la membresía de un cliente en el gimnasio Fit Club.
  * Contiene el tipo, las fechas de vigencia y expone lógica
  * para verificar si la membresía se encuentra activa.
+ * Implementa {@link ICalculable} para formalizar el contrato
+ * de cálculo de valor y vigencia.
  */
+public class Membresia implements ICalculable {
 
-public class Membresia {
+    private static final double VALOR_BASE_MENSUAL = 80000.0;
 
     private int idMembresia;
     private String tipo;
@@ -19,11 +22,10 @@ public class Membresia {
      * Constructor de Membresia.
      *
      * @param idMembresia      Identificador único de la membresía.
-     * @param tipo             Tipo de membresía (mensual, trimestral, anual).
+     * @param tipo             Tipo de membresía (mensual, trimestral, semestral, anual).
      * @param fechaInicio      Fecha de inicio de la membresía.
      * @param fechaVencimiento Fecha de vencimiento de la membresía.
      */
-
     public Membresia(String tipo, int idMembresia, LocalDate fechaInicio, LocalDate fechaVencimiento) {
         this.tipo = tipo;
         this.idMembresia = idMembresia;
@@ -32,12 +34,29 @@ public class Membresia {
     }
 
     /**
+     * Calcula el valor total de la membresía según su tipo.
+     * mensual = valor base, trimestral = base x 3,
+     * semestral = base x 6, anual = base x 12.
+     *
+     * @return total a pagar como {@code double}.
+     */
+    @Override
+    public double calcularTotal() {
+        return switch (tipo.toLowerCase()) {
+            case "trimestral" -> VALOR_BASE_MENSUAL * 3;
+            case "semestral"  -> VALOR_BASE_MENSUAL * 6;
+            case "anual"      -> VALOR_BASE_MENSUAL * 12;
+            default           -> VALOR_BASE_MENSUAL; // mensual
+        };
+    }
+
+    /**
      * Verifica si la membresía se encuentra vigente a la fecha actual.
      *
      * @return {@code true} si la fecha actual es anterior o igual al vencimiento.
      */
-
-    public boolean estaVigente(){
+    @Override
+    public boolean estaVigente() {
         return !LocalDate.now().isAfter(fechaVencimiento);
     }
 
@@ -46,11 +65,9 @@ public class Membresia {
     }
 
     public void setIdMembresia(int idMembresia) {
-
         if (idMembresia <= 0) throw new IllegalArgumentException("El ID de membresía debe ser mayor a cero.");
         this.idMembresia = idMembresia;
     }
-
 
     public String getTipo() {
         return tipo;
@@ -59,11 +76,9 @@ public class Membresia {
     /**
      * Establece el tipo de membresía.
      *
-     * @param tipo Debe ser mensual, trimestral o anual.
+     * @param tipo Debe ser mensual, trimestral, semestral o anual.
      */
-
     public void setTipo(String tipo) {
-
         if (tipo == null || tipo.trim().isEmpty()) throw new IllegalArgumentException("El tipo de membresía no puede estar vacío.");
         this.tipo = tipo;
     }
@@ -73,8 +88,7 @@ public class Membresia {
     }
 
     public void setFechaInicio(LocalDate fechaInicio) {
-
-        if (fechaInicio == null) throw new IllegalArgumentException("La fecha de inicio no puede estar vacio");
+        if (fechaInicio == null) throw new IllegalArgumentException("La fecha de inicio no puede estar vacío.");
         this.fechaInicio = fechaInicio;
     }
 
@@ -88,11 +102,9 @@ public class Membresia {
      *
      * @param fechaVencimiento Nueva fecha de vencimiento.
      */
-
     public void setFechaVencimiento(LocalDate fechaVencimiento) {
-
-        if (fechaVencimiento == null) throw new IllegalArgumentException("La fecha de vencimiento no puede ser nulo");
-        if (fechaInicio != null && fechaVencimiento.isBefore(fechaInicio)) throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la fecha de inicio");
+        if (fechaVencimiento == null) throw new IllegalArgumentException("La fecha de vencimiento no puede ser nula.");
+        if (fechaInicio != null && fechaVencimiento.isBefore(fechaInicio)) throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la fecha de inicio.");
         this.fechaVencimiento = fechaVencimiento;
     }
 }
