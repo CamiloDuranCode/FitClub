@@ -102,4 +102,24 @@ public class PagoDAO implements IPagoDAO {
         }
         return lista;
     }
+
+    @Override
+    public List<Pago> listarTodos() {
+        List<Pago> lista = new ArrayList<>();
+        String sql = "SELECT * FROM pago";
+        try (Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(new Pago(
+                        rs.getInt("id_pago"),
+                        rs.getDouble("monto"),
+                        rs.getDate("fecha_pago").toLocalDate(),
+                        rs.getString("metodo_pago")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al listar pagos: " + e.getMessage());
+        }
+        return lista;
+    }
 }
