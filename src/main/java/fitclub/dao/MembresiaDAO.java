@@ -12,58 +12,49 @@ import java.util.List;
  */
 public class MembresiaDAO implements IMembresiaDAO {
 
-    private Connection con;
-
-    public MembresiaDAO() {
-        this.con = Conexion.getInstancia();
-    }
-
     @Override
     public void insertar(Membresia membresia, String clienteCedula) {
         String sql = "INSERT INTO membresia (cliente_cedula, tipo, fecha_inicio, fecha_vencimiento) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
             ps.setString(2, membresia.getTipo());
             ps.setDate(3, Date.valueOf(membresia.getFechaInicio()));
             ps.setDate(4, Date.valueOf(membresia.getFechaVencimiento()));
             ps.executeUpdate();
-            System.out.println("Membresía insertada correctamente.");
         } catch (SQLException e) {
-            System.err.println("Error al insertar membresía: " + e.getMessage());
+            throw new RuntimeException("Error al insertar membresía: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void actualizar(Membresia membresia) {
         String sql = "UPDATE membresia SET tipo = ?, fecha_inicio = ?, fecha_vencimiento = ? WHERE id_membresia = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, membresia.getTipo());
             ps.setDate(2, Date.valueOf(membresia.getFechaInicio()));
             ps.setDate(3, Date.valueOf(membresia.getFechaVencimiento()));
             ps.setInt(4, membresia.getIdMembresia());
             ps.executeUpdate();
-            System.out.println("Membresía actualizada correctamente.");
         } catch (SQLException e) {
-            System.err.println("Error al actualizar membresía: " + e.getMessage());
+            throw new RuntimeException("Error al actualizar membresía: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void eliminar(int idMembresia) {
         String sql = "DELETE FROM membresia WHERE id_membresia = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idMembresia);
             ps.executeUpdate();
-            System.out.println("Membresía eliminada correctamente.");
         } catch (SQLException e) {
-            System.err.println("Error al eliminar membresía: " + e.getMessage());
+            throw new RuntimeException("Error al eliminar membresía: " + e.getMessage(), e);
         }
     }
 
     @Override
     public Membresia buscarPorId(int idMembresia) {
         String sql = "SELECT * FROM membresia WHERE id_membresia = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idMembresia);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -76,7 +67,7 @@ public class MembresiaDAO implements IMembresiaDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar membresía: " + e.getMessage());
+            throw new RuntimeException("Error al buscar membresía: " + e.getMessage(), e);
         }
         return null;
     }
@@ -85,7 +76,7 @@ public class MembresiaDAO implements IMembresiaDAO {
     public List<Membresia> listarPorCliente(String clienteCedula) {
         List<Membresia> lista = new ArrayList<>();
         String sql = "SELECT * FROM membresia WHERE cliente_cedula = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -98,7 +89,7 @@ public class MembresiaDAO implements IMembresiaDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar membresías: " + e.getMessage());
+            throw new RuntimeException("Error al listar membresías: " + e.getMessage(), e);
         }
         return lista;
     }

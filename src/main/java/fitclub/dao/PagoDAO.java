@@ -12,58 +12,49 @@ import java.util.List;
  */
 public class PagoDAO implements IPagoDAO {
 
-    private Connection con;
-
-    public PagoDAO() {
-        this.con = Conexion.getInstancia();
-    }
-
     @Override
     public void insertar(Pago pago, int membresiaId) {
         String sql = "INSERT INTO pago (membresia_id, monto, fecha_pago, metodo_pago) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, membresiaId);
             ps.setDouble(2, pago.getMonto());
             ps.setDate(3, Date.valueOf(pago.getFechaPago()));
             ps.setString(4, pago.getMetodoPago());
             ps.executeUpdate();
-            System.out.println("Pago insertado correctamente.");
         } catch (SQLException e) {
-            System.err.println("Error al insertar pago: " + e.getMessage());
+            throw new RuntimeException("Error al insertar pago: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void actualizar(Pago pago) {
         String sql = "UPDATE pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setDouble(1, pago.getMonto());
             ps.setDate(2, Date.valueOf(pago.getFechaPago()));
             ps.setString(3, pago.getMetodoPago());
             ps.setInt(4, pago.getIdPago());
             ps.executeUpdate();
-            System.out.println("Pago actualizado correctamente.");
         } catch (SQLException e) {
-            System.err.println("Error al actualizar pago: " + e.getMessage());
+            throw new RuntimeException("Error al actualizar pago: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void eliminar(int idPago) {
         String sql = "DELETE FROM pago WHERE id_pago = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idPago);
             ps.executeUpdate();
-            System.out.println("Pago eliminado correctamente.");
         } catch (SQLException e) {
-            System.err.println("Error al eliminar pago: " + e.getMessage());
+            throw new RuntimeException("Error al eliminar pago: " + e.getMessage(), e);
         }
     }
 
     @Override
     public Pago buscarPorId(int idPago) {
         String sql = "SELECT * FROM pago WHERE id_pago = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idPago);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -76,7 +67,7 @@ public class PagoDAO implements IPagoDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar pago: " + e.getMessage());
+            throw new RuntimeException("Error al buscar pago: " + e.getMessage(), e);
         }
         return null;
     }
@@ -85,7 +76,7 @@ public class PagoDAO implements IPagoDAO {
     public List<Pago> listarPorMembresia(int membresiaId) {
         List<Pago> lista = new ArrayList<>();
         String sql = "SELECT * FROM pago WHERE membresia_id = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, membresiaId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -98,7 +89,7 @@ public class PagoDAO implements IPagoDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar pagos: " + e.getMessage());
+            throw new RuntimeException("Error al listar pagos: " + e.getMessage(), e);
         }
         return lista;
     }
