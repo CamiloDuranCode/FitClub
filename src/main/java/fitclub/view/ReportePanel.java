@@ -49,22 +49,28 @@ public class ReportePanel extends JPanel {
         add(titulo, BorderLayout.NORTH);
 
         // ===== PANEL DE FILTROS =====
-        JPanel panelFiltros = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        JPanel panelFiltros = new JPanel(new GridLayout(2, 1, 0, 5));
         panelFiltros.setBackground(Color.WHITE);
         panelFiltros.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247), 1),
                 BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
 
-        panelFiltros.add(new JLabel("Fecha inicio (yyyy-MM-dd):"));
+        JPanel filaFechas = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        filaFechas.setBackground(Color.WHITE);
+
+        JPanel filaTotal = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        filaTotal.setBackground(Color.WHITE);
+
+        filaFechas.add(new JLabel("Fecha inicio (yyyy-MM-dd):"));
         txtFechaInicio = new JTextField(12);
         txtFechaInicio.setText(LocalDate.now().withDayOfMonth(1).toString());
-        panelFiltros.add(txtFechaInicio);
+        filaFechas.add(txtFechaInicio);
 
-        panelFiltros.add(new JLabel("Fecha fin (yyyy-MM-dd):"));
+        filaFechas.add(new JLabel("Fecha fin (yyyy-MM-dd):"));
         txtFechaFin = new JTextField(12);
         txtFechaFin.setText(LocalDate.now().toString());
-        panelFiltros.add(txtFechaFin);
+        filaFechas.add(txtFechaFin);
 
         JButton btnGenerar = new JButton("Generar Reporte");
         btnGenerar.setBackground(new Color(46, 95, 163));
@@ -73,7 +79,7 @@ public class ReportePanel extends JPanel {
         btnGenerar.setFocusPainted(false);
         btnGenerar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnGenerar.addActionListener(e -> generarReporte());
-        panelFiltros.add(btnGenerar);
+        filaFechas.add(btnGenerar);
 
         JButton btnLimpiar = new JButton("Limpiar");
         btnLimpiar.setBackground(new Color(242, 245, 250));
@@ -81,14 +87,18 @@ public class ReportePanel extends JPanel {
         btnLimpiar.setFocusPainted(false);
         btnLimpiar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLimpiar.addActionListener(e -> limpiar());
-        panelFiltros.add(btnLimpiar);
+        filaFechas.add(btnLimpiar);
+
+            panelFiltros.add(filaFechas);
+            panelFiltros.add(filaTotal);
 
         // ===== LABEL TOTAL =====
         lblTotal = new JLabel("Total de ingresos: —");
         lblTotal.setFont(new Font("Arial", Font.BOLD, 15));
         lblTotal.setForeground(new Color(55, 86, 35));
         lblTotal.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-        panelFiltros.add(lblTotal);
+        filaTotal.add(lblTotal);
+
 
         add(panelFiltros, BorderLayout.NORTH);
 
