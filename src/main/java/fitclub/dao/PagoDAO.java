@@ -19,7 +19,7 @@ public class PagoDAO implements IPagoDAO {
             ps.setInt(1, membresiaId);
             ps.setDouble(2, pago.getMonto());
             ps.setDate(3, Date.valueOf(pago.getFechaPago()));
-            ps.setString(4, pago.getMetodoPago());
+            ps.setObject(4, pago.getMetodoPago(), java.sql.Types.OTHER);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al insertar pago: " + e.getMessage(), e);
@@ -28,7 +28,7 @@ public class PagoDAO implements IPagoDAO {
 
     @Override
     public void actualizar(Pago pago) {
-        String sql = "UPDATE pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
+        String sql = "UPDATE Pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setDouble(1, pago.getMonto());
             ps.setDate(2, Date.valueOf(pago.getFechaPago()));
@@ -98,7 +98,7 @@ public class PagoDAO implements IPagoDAO {
     public List<Pago> listarTodos() {
         List<Pago> lista = new ArrayList<>();
         String sql = "SELECT * FROM pago";
-        try (Statement st = con.createStatement();
+        try (Statement st = Conexion.getInstancia().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 lista.add(new Pago(
