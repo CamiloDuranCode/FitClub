@@ -17,7 +17,7 @@ public class MembresiaDAO implements IMembresiaDAO {
         String sql = "INSERT INTO membresia (cliente_cedula, tipo, fecha_inicio, fecha_vencimiento) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
-            ps.setString(2, membresia.getTipo());
+            ps.setObject(2, membresia.getTipo(), java.sql.Types.OTHER);
             ps.setDate(3, Date.valueOf(membresia.getFechaInicio()));
             ps.setDate(4, Date.valueOf(membresia.getFechaVencimiento()));
             ps.executeUpdate();
