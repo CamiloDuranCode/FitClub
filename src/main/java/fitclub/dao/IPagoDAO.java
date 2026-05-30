@@ -9,4 +9,5 @@ public interface IPagoDAO {
     void eliminar(int idPago);
     Pago buscarPorId(int idPago);
     List<Pago> listarPorMembresia(int membresiaId);
+    List<Pago> listarTodos();
 }
