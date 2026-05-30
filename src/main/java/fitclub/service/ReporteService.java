@@ -4,6 +4,7 @@ import fitclub.dao.MembresiaDAO;
 import fitclub.dao.PagoDAO;
 import fitclub.model.Membresia;
 import fitclub.model.Pago;
+import fitclub.dao.Conexion;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.sql.*;
 
 /**
  * Capa de servicios para la generación de reportes de ingresos del gimnasio Fit Club.
@@ -76,15 +78,19 @@ public class ReporteService {
         validarFechas(inicio, fin);
         Map<String, Double> resultado = new LinkedHashMap<>();
 
-        List<Pago> pagos = obtenerPagosPorPeriodo(inicio, fin);
-
-        for (Pago pago : pagos) {
-            // Buscar la membresía asociada al pago para obtener su tipo
-            Membresia membresia = membresiaDAO.buscarPorId(pago.getIdPago());
-            if (membresia != null) {
-                String tipo = membresia.getTipo().toLowerCase();
-                resultado.merge(tipo, pago.getMonto(), Double::sum);
+        String sql = "SELECT m.tipo, SUM(p.monto) as total " +
+                "FROM pago p JOIN membresia m ON p.membresia_id = m.id_membresia " +
+                "WHERE p.fecha_pago BETWEEN ? AND ? " +
+                "GROUP BY m.tipo";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(inicio));
+            ps.setDate(2, Date.valueOf(fin));
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                resultado.put(rs.getString("tipo").toLowerCase(), rs.getDouble("total"));
             }
+        } catch (SQLException e) {
+            System.err.println("Error al agrupar por tipo: " + e.getMessage());
         }
         return resultado;
     }
