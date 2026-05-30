@@ -136,10 +136,9 @@ public class MainFrame extends JFrame {
         contenedor.removeAll();
         switch (modulo) {
             case "Reportes" -> contenedor.add(new ReportePanel(), BorderLayout.CENTER);
-            // Los demás paneles se agregarán cuando estén implementados:
-            // case "Clientes"    -> contenedor.add(new ClientePanel(), BorderLayout.CENTER);
-            // case "Membresias"  -> contenedor.add(new MembresiaPanel(), BorderLayout.CENTER);
-            // case "Asistencia"  -> contenedor.add(new AsistenciaPanel(), BorderLayout.CENTER);
+            case "Clientes"   -> contenedor.add(new ClienteForm(), BorderLayout.CENTER);
+            case "Membresias" -> contenedor.add(new MembresiaForm(), BorderLayout.CENTER);
+            case "Asistencia" -> contenedor.add(new AsistenciaForm(), BorderLayout.CENTER);
             default -> {
                 JLabel proximamente = new JLabel("Módulo en desarrollo...", SwingConstants.CENTER);
                 proximamente.setFont(new Font("Arial", Font.PLAIN, 15));
