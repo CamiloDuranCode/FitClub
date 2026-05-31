@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class PagoDAO implements IPagoDAO {
 
+    private Connection con;
+
     @Override
     public void insertar(Pago pago, int membresiaId) {
         String sql = "INSERT INTO pago (membresia_id, monto, fecha_pago, metodo_pago) VALUES (?, ?, ?, ?)";

@@ -1,6 +1,6 @@
 package fitclub.service;
 
-import fitclub.dao.MembresiaDAO;
+import fitclub.dao.IMembresiaDAO;
 import fitclub.model.Membresia;
 
 import java.time.LocalDate;
@@ -17,9 +17,10 @@ import java.util.stream.Collectors;
 public class MembresiaService {
 
     private static final int DIAS_ALERTA = 5;
-    private final MembresiaDAO membresiaDAO;
 
-    public MembresiaService(MembresiaDAO membresiaDAO) {
+    private final IMembresiaDAO membresiaDAO;
+
+    public MembresiaService(IMembresiaDAO membresiaDAO) {
         this.membresiaDAO = membresiaDAO;
     }
 
