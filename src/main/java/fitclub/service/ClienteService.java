@@ -1,6 +1,6 @@
 package fitclub.service;
 
-import fitclub.dao.ClienteDAO;
+import fitclub.dao.IClienteDAO;
 import fitclub.model.Cliente;
 
 import java.util.List;
@@ -8,14 +8,14 @@ import java.util.List;
 /**
  * Capa de servicios para la gestión de clientes del gimnasio Fit Club.
  * Contiene la lógica de negocio para registrar, buscar y actualizar clientes,
- * delegando la persistencia a la capa DAO mediante {@link ClienteDAO}.
+ * delegando la persistencia a la capa DAO mediante {@link IClienteDAO}.
  */
 
 public class ClienteService {
 
-    private final ClienteDAO clienteDAO;
+    private final IClienteDAO clienteDAO;
 
-    public ClienteService(ClienteDAO clienteDAO) {
+    public ClienteService(IClienteDAO clienteDAO) {
         this.clienteDAO = clienteDAO;
     }
 
