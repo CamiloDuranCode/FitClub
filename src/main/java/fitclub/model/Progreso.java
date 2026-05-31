@@ -92,4 +92,28 @@ public class Progreso {
     public void setObservaciones(String observaciones) {
         this.observaciones = (observaciones == null) ? "" : observaciones;
     }
+
+    /**
+     * Calcula el Índice de Masa Corporal (IMC) del cliente.
+     * Fórmula: peso / (talla * talla)
+     *
+     * @return IMC como {@code double} redondeado a dos decimales.
+     */
+    public double calcularIMC() {
+        if (talla <= 0) throw new IllegalStateException("La talla debe ser mayor a cero para calcular el IMC.");
+        return Math.round((peso / (talla * talla)) * 100.0) / 100.0;
+    }
+
+    /**
+     * Retorna la clasificación del IMC según los rangos de la OMS.
+     *
+     * @return clasificación como {@link String}.
+     */
+    public String clasificarIMC() {
+        double imc = calcularIMC();
+        if (imc < 18.5) return "Bajo peso";
+        else if (imc < 25.0) return "Peso normal";
+        else if (imc < 30.0) return "Sobrepeso";
+        else return "Obesidad";
+    }
 }
