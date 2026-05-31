@@ -12,6 +12,7 @@ CREATE TABLE entrenador (
     cedula       VARCHAR(20)  NOT NULL,
     especialidad VARCHAR(100),
     horario      VARCHAR(100),
+	activo       BOOLEAN DEFAULT true;
     CONSTRAINT pk_entrenador         PRIMARY KEY (cedula),
     CONSTRAINT fk_entrenador_persona FOREIGN KEY (cedula)
         REFERENCES persona(cedula)
@@ -23,6 +24,7 @@ CREATE TABLE cliente (
     fecha_nacimiento  DATE,
     direccion         VARCHAR(200),
     entrenador_cedula VARCHAR(20),
+	activo            BOOLEAN DEFAULT true;
     CONSTRAINT pk_cliente            PRIMARY KEY (cedula),
     CONSTRAINT fk_cliente_persona    FOREIGN KEY (cedula)
         REFERENCES persona(cedula)
@@ -106,3 +108,8 @@ CREATE TABLE progreso (
         REFERENCES rutina(id_rutina)
         ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
+
+
+
+
