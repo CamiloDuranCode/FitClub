@@ -44,32 +44,41 @@ public class ClienteForm extends JPanel {
         add(titulo, BorderLayout.NORTH);
 
         // ===== PANEL DE CAMPOS =====
-        JPanel panelCampos = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel panelCampos = new JPanel(new GridBagLayout());
         panelCampos.setBackground(Color.WHITE);
         panelCampos.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247), 1),
                 BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
 
-        panelCampos.add(new JLabel("Cédula:"));
-        txtCedula = new JTextField();
-        panelCampos.add(txtCedula);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        panelCampos.add(new JLabel("Nombre:"));
-        txtNombre = new JTextField();
-        panelCampos.add(txtNombre);
+        gbc.gridx = 0; gbc.gridy = 0;
+        panelCampos.add(new JLabel("Cédula:"), gbc);
+        gbc.gridx = 1; txtCedula = new JTextField(15);
+        panelCampos.add(txtCedula, gbc);
 
-        panelCampos.add(new JLabel("Teléfono:"));
-        txtTelefono = new JTextField();
-        panelCampos.add(txtTelefono);
+        gbc.gridx = 0; gbc.gridy = 1;
+        panelCampos.add(new JLabel("Nombre:"), gbc);
+        gbc.gridx = 1; txtNombre = new JTextField(15);
+        panelCampos.add(txtNombre, gbc);
 
-        panelCampos.add(new JLabel("Fecha Nacimiento (YYYY-MM-DD):"));
-        txtFechaNacimiento = new JTextField();
-        panelCampos.add(txtFechaNacimiento);
+        gbc.gridx = 0; gbc.gridy = 2;
+        panelCampos.add(new JLabel("Teléfono:"), gbc);
+        gbc.gridx = 1; txtTelefono = new JTextField(15);
+        panelCampos.add(txtTelefono, gbc);
 
-        panelCampos.add(new JLabel("Dirección:"));
-        txtDireccion = new JTextField();
-        panelCampos.add(txtDireccion);
+        gbc.gridx = 0; gbc.gridy = 3;
+        panelCampos.add(new JLabel("Fecha Nacimiento (YYYY-MM-DD):"), gbc);
+        gbc.gridx = 1; txtFechaNacimiento = new JTextField(15);
+        panelCampos.add(txtFechaNacimiento, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 4;
+        panelCampos.add(new JLabel("Dirección:"), gbc);
+        gbc.gridx = 1; txtDireccion = new JTextField(15);
+        panelCampos.add(txtDireccion, gbc);
 
         // ===== PANEL DE BOTONES =====
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
