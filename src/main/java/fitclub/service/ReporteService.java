@@ -1,19 +1,16 @@
 package fitclub.service;
 
-import fitclub.dao.MembresiaDAO;
-import fitclub.dao.PagoDAO;
+import fitclub.dao.IMembresiaDAO;
+import fitclub.dao.IPagoDAO;
 import fitclub.model.Membresia;
 import fitclub.model.Pago;
-import fitclub.dao.Conexion;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.sql.*;
 
 /**
  * Capa de servicios para la generación de reportes de ingresos del gimnasio Fit Club.
@@ -24,8 +21,8 @@ import java.sql.*;
  */
 public class ReporteService {
 
-    private final PagoDAO pagoDAO;
-    private final MembresiaDAO membresiaDAO;
+    private final IPagoDAO pagoDAO;
+    private final IMembresiaDAO membresiaDAO;
 
     /**
      * Constructor de ReporteService.
@@ -33,7 +30,7 @@ public class ReporteService {
      * @param pagoDAO      DAO de pagos para consultar transacciones.
      * @param membresiaDAO DAO de membresías para consultar estados.
      */
-    public ReporteService(PagoDAO pagoDAO, MembresiaDAO membresiaDAO) {
+    public ReporteService(IPagoDAO pagoDAO, IMembresiaDAO membresiaDAO) {
         this.pagoDAO = pagoDAO;
         this.membresiaDAO = membresiaDAO;
     }
@@ -44,7 +41,6 @@ public class ReporteService {
      * @param inicio Fecha de inicio del período.
      * @param fin    Fecha de fin del período.
      * @return Lista de pagos dentro del período.
-     * @throws IllegalArgumentException si las fechas son nulas o el inicio es posterior al fin.
      */
     public List<Pago> obtenerPagosPorPeriodo(LocalDate inicio, LocalDate fin) {
         validarFechas(inicio, fin);
@@ -68,7 +64,7 @@ public class ReporteService {
 
     /**
      * Agrupa y suma los ingresos por tipo de membresía dentro del período.
-     * Ejemplo: {"mensual" -> 240000.0, "trimestral" -> 180000.0}
+     * Delega la consulta al DAO y agrupa los resultados en memoria.
      *
      * @param inicio Fecha de inicio del período.
      * @param fin    Fecha de fin del período.
@@ -78,26 +74,19 @@ public class ReporteService {
         validarFechas(inicio, fin);
         Map<String, Double> resultado = new LinkedHashMap<>();
 
-        String sql = "SELECT m.tipo, SUM(p.monto) as total " +
-                "FROM pago p JOIN membresia m ON p.membresia_id = m.id_membresia " +
-                "WHERE p.fecha_pago BETWEEN ? AND ? " +
-                "GROUP BY m.tipo";
-        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(inicio));
-            ps.setDate(2, Date.valueOf(fin));
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                resultado.put(rs.getString("tipo").toLowerCase(), rs.getDouble("total"));
+        List<Pago> pagos = obtenerPagosPorPeriodo(inicio, fin);
+        for (Pago pago : pagos) {
+            Membresia membresia = membresiaDAO.buscarPorId(pago.getIdPago());
+            if (membresia != null) {
+                String tipo = membresia.getTipo().toLowerCase();
+                resultado.merge(tipo, pago.getMonto(), Double::sum);
             }
-        } catch (SQLException e) {
-            System.err.println("Error al agrupar por tipo: " + e.getMessage());
         }
         return resultado;
     }
 
     /**
      * Agrupa y suma los ingresos por mes dentro del período.
-     * El mes se representa como "yyyy-MM" (ej. "2025-05").
      *
      * @param inicio Fecha de inicio del período.
      * @param fin    Fecha de fin del período.
@@ -133,8 +122,6 @@ public class ReporteService {
 
     /**
      * Genera un resumen completo del período especificado.
-     * Incluye total de ingresos, número de pagos, ingresos por mes
-     * e ingresos por tipo de membresía.
      *
      * @param inicio Fecha de inicio del período.
      * @param fin    Fecha de fin del período.
@@ -145,7 +132,6 @@ public class ReporteService {
         Map<String, Object> resumen = new LinkedHashMap<>();
 
         List<Pago> pagos = obtenerPagosPorPeriodo(inicio, fin);
-
         resumen.put("periodoInicio", inicio.toString());
         resumen.put("periodoFin", fin.toString());
         resumen.put("totalPagos", pagos.size());
@@ -161,14 +147,9 @@ public class ReporteService {
      *
      * @param inicio Fecha de inicio.
      * @param fin    Fecha de fin.
-     * @throws IllegalArgumentException si alguna fecha es nula o el inicio es posterior al fin.
      */
     private void validarFechas(LocalDate inicio, LocalDate fin) {
-        if (inicio == null || fin == null) {
-            throw new IllegalArgumentException("Las fechas de inicio y fin no pueden ser nulas.");
-        }
-        if (inicio.isAfter(fin)) {
-            throw new IllegalArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
-        }
+        if (inicio == null || fin == null) throw new IllegalArgumentException("Las fechas no pueden ser nulas.");
+        if (inicio.isAfter(fin)) throw new IllegalArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
     }
 }
