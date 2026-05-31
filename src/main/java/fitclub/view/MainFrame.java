@@ -55,6 +55,8 @@ public class MainFrame extends JFrame {
 
         sidebar.add(crearBotonMenu("👥  Clientes", "Clientes"));
         sidebar.add(Box.createVerticalStrut(8));
+        sidebar.add(crearBotonMenu("💪  Entrenadores", "Entrenadores"));
+        sidebar.add(Box.createVerticalStrut(8));
         sidebar.add(crearBotonMenu("💳  Membresías", "Membresias"));
         sidebar.add(Box.createVerticalStrut(8));
         sidebar.add(crearBotonMenu("📋  Asistencia", "Asistencia"));
@@ -139,6 +141,8 @@ public class MainFrame extends JFrame {
             case "Clientes"   -> contenedor.add(new ClienteForm(), BorderLayout.CENTER);
             case "Membresias" -> contenedor.add(new MembresiaForm(), BorderLayout.CENTER);
             case "Asistencia" -> contenedor.add(new AsistenciaForm(), BorderLayout.CENTER);
+            case "Rutinas" -> contenedor.add(new RutinaForm(), BorderLayout.CENTER);
+            case "Entrenadores" -> contenedor.add(new EntrenadorForm(), BorderLayout.CENTER);
             default -> {
                 JLabel proximamente = new JLabel("Módulo en desarrollo...", SwingConstants.CENTER);
                 proximamente.setFont(new Font("Arial", Font.PLAIN, 15));

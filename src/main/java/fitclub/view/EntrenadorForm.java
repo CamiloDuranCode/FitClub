@@ -1,32 +1,37 @@
 package fitclub.view;
 
-import fitclub.dao.ClienteDAO;
-import fitclub.model.Cliente;
+import fitclub.dao.EntrenadorDAO;
+import fitclub.model.Entrenador;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 /**
- * Panel de gestión de clientes del gimnasio Fit Club.
+ * Panel de gestión de entrenadores del gimnasio Fit Club.
  *
  * @author Wilberto Ariza Zapata
  */
-public class ClienteForm extends JPanel {
+public class EntrenadorForm extends JPanel {
 
     private JTextField txtCedula;
     private JTextField txtNombre;
     private JTextField txtTelefono;
-    private JTextField txtFechaNacimiento;
-    private JTextField txtDireccion;
-    private JTable tablaClientes;
+    private JTextField txtEspecialidad;
+    private JTextField txtHorario;
+    private JTable tablaEntrenadores;
     private DefaultTableModel modeloTabla;
 
-    private ClienteDAO clienteDAO;
+    private EntrenadorDAO entrenadorDAO;
 
-    public ClienteForm() {
-        clienteDAO = new ClienteDAO();
+    public EntrenadorForm() {
+        entrenadorDAO = new EntrenadorDAO();
         initComponents();
         cargarTabla();
     }
@@ -37,7 +42,7 @@ public class ClienteForm extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // ===== TÍTULO =====
-        JLabel titulo = new JLabel("👥  Gestión de Clientes");
+        JLabel titulo = new JLabel("💪  Gestión de Entrenadores");
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
         titulo.setForeground(new Color(31, 56, 100));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
@@ -71,14 +76,14 @@ public class ClienteForm extends JPanel {
         panelCampos.add(txtTelefono, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        panelCampos.add(new JLabel("Fecha Nacimiento (YYYY-MM-DD):"), gbc);
-        gbc.gridx = 1; txtFechaNacimiento = new JTextField(15);
-        panelCampos.add(txtFechaNacimiento, gbc);
+        panelCampos.add(new JLabel("Especialidad:"), gbc);
+        gbc.gridx = 1; txtEspecialidad = new JTextField(15);
+        panelCampos.add(txtEspecialidad, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4;
-        panelCampos.add(new JLabel("Dirección:"), gbc);
-        gbc.gridx = 1; txtDireccion = new JTextField(15);
-        panelCampos.add(txtDireccion, gbc);
+        panelCampos.add(new JLabel("Horario:"), gbc);
+        gbc.gridx = 1; txtHorario = new JTextField(15);
+        panelCampos.add(txtHorario, gbc);
 
         // ===== PANEL DE BOTONES =====
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -102,41 +107,41 @@ public class ClienteForm extends JPanel {
 
         // ===== TABLA =====
         modeloTabla = new DefaultTableModel(
-                new String[]{"Cédula", "Nombre", "Teléfono", "Fecha Nac.", "Dirección"}, 0) {
+                new String[]{"Cédula", "Nombre", "Teléfono", "Especialidad", "Horario"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        tablaClientes = new JTable(modeloTabla);
-        tablaClientes.setFont(new Font("Arial", Font.PLAIN, 13));
-        tablaClientes.setRowHeight(28);
-        tablaClientes.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
-        tablaClientes.getTableHeader().setBackground(new Color(46, 95, 163));
-        tablaClientes.getTableHeader().setForeground(Color.WHITE);
+        tablaEntrenadores = new JTable(modeloTabla);
+        tablaEntrenadores.setFont(new Font("Arial", Font.PLAIN, 13));
+        tablaEntrenadores.setRowHeight(28);
+        tablaEntrenadores.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        tablaEntrenadores.getTableHeader().setBackground(new Color(46, 95, 163));
+        tablaEntrenadores.getTableHeader().setForeground(Color.WHITE);
 
         JPanel panelTabla = new JPanel(new BorderLayout());
         panelTabla.setBackground(Color.WHITE);
         panelTabla.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247)),
-                "Clientes registrados", 0, 0,
+                "Entrenadores registrados", 0, 0,
                 new Font("Arial", Font.BOLD, 13),
                 new Color(31, 56, 100)
         ));
-        panelTabla.add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+        panelTabla.add(new JScrollPane(tablaEntrenadores), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
         // ===== ACCIONES =====
-        btnGuardar.addActionListener(e -> guardarCliente());
-        btnBuscar.addActionListener(e -> buscarCliente());
-        btnEliminar.addActionListener(e -> eliminarCliente());
+        btnGuardar.addActionListener(e -> guardarEntrenador());
+        btnBuscar.addActionListener(e -> buscarEntrenador());
+        btnEliminar.addActionListener(e -> eliminarEntrenador());
         btnLimpiar.addActionListener(e -> limpiarCampos());
 
-        tablaClientes.getSelectionModel().addListSelectionListener(e -> {
-            int fila = tablaClientes.getSelectedRow();
+        tablaEntrenadores.getSelectionModel().addListSelectionListener(e -> {
+            int fila = tablaEntrenadores.getSelectedRow();
             if (fila >= 0) {
                 txtCedula.setText((String) modeloTabla.getValueAt(fila, 0));
                 txtNombre.setText((String) modeloTabla.getValueAt(fila, 1));
                 txtTelefono.setText((String) modeloTabla.getValueAt(fila, 2));
-                txtFechaNacimiento.setText((String) modeloTabla.getValueAt(fila, 3));
-                txtDireccion.setText((String) modeloTabla.getValueAt(fila, 4));
+                txtEspecialidad.setText((String) modeloTabla.getValueAt(fila, 3));
+                txtHorario.setText((String) modeloTabla.getValueAt(fila, 4));
             }
         });
     }
@@ -153,62 +158,58 @@ public class ClienteForm extends JPanel {
 
     private void cargarTabla() {
         modeloTabla.setRowCount(0);
-        clienteDAO.listarTodos().forEach(c -> modeloTabla.addRow(new Object[]{
-                c.getCedula(),
-                c.getNombre(),
-                c.getTelefono(),
-                c.getFechaNacimiento().toString(),
-                c.getDireccion()
+        entrenadorDAO.listarTodos().forEach(e -> modeloTabla.addRow(new Object[]{
+                e.getCedula(),
+                e.getNombre(),
+                e.getTelefono(),
+                e.getEspecialidad(),
+                e.getHorario()
         }));
     }
 
-    private void guardarCliente() {
+    private void guardarEntrenador() {
         if (txtCedula.getText().isEmpty() || txtNombre.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Cédula y nombre son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        try {
-            Cliente cliente = new Cliente(
-                    txtCedula.getText(),
-                    txtNombre.getText(),
-                    txtTelefono.getText(),
-                    LocalDate.parse(txtFechaNacimiento.getText()),
-                    txtDireccion.getText()
-            );
-            clienteDAO.insertar(cliente);
-            JOptionPane.showMessageDialog(this, "Cliente guardado correctamente.");
-            limpiarCampos();
-            cargarTabla();
-        } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Formato de fecha inválido. Use YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        Entrenador entrenador = new Entrenador(
+                txtCedula.getText(),
+                txtNombre.getText(),
+                txtTelefono.getText(),
+                txtEspecialidad.getText(),
+                txtHorario.getText()
+        );
+        entrenadorDAO.insertar(entrenador);
+        JOptionPane.showMessageDialog(this, "Entrenador guardado correctamente.");
+        limpiarCampos();
+        cargarTabla();
     }
 
-    private void buscarCliente() {
+    private void buscarEntrenador() {
         if (txtCedula.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Ingrese una cédula para buscar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        Cliente c = clienteDAO.buscarPorCedula(txtCedula.getText());
-        if (c != null) {
-            txtNombre.setText(c.getNombre());
-            txtTelefono.setText(c.getTelefono());
-            txtFechaNacimiento.setText(c.getFechaNacimiento().toString());
-            txtDireccion.setText(c.getDireccion());
+        Entrenador e = entrenadorDAO.buscarPorCedula(txtCedula.getText());
+        if (e != null) {
+            txtNombre.setText(e.getNombre());
+            txtTelefono.setText(e.getTelefono());
+            txtEspecialidad.setText(e.getEspecialidad());
+            txtHorario.setText(e.getHorario());
         } else {
-            JOptionPane.showMessageDialog(this, "Cliente no encontrado.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Entrenador no encontrado.", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    private void eliminarCliente() {
+    private void eliminarEntrenador() {
         if (txtCedula.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Ingrese una cédula para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        int confirmar = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar este cliente?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int confirmar = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar este entrenador?", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (confirmar == JOptionPane.YES_OPTION) {
-            clienteDAO.eliminar(txtCedula.getText());
-            JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente.");
+            entrenadorDAO.eliminar(txtCedula.getText());
+            JOptionPane.showMessageDialog(this, "Entrenador eliminado correctamente.");
             limpiarCampos();
             cargarTabla();
         }
@@ -218,7 +219,7 @@ public class ClienteForm extends JPanel {
         txtCedula.setText("");
         txtNombre.setText("");
         txtTelefono.setText("");
-        txtFechaNacimiento.setText("");
-        txtDireccion.setText("");
+        txtEspecialidad.setText("");
+        txtHorario.setText("");
     }
 }

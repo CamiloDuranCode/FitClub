@@ -1,0 +1,13 @@
+package fitclub.dao;
+
+import fitclub.model.Entrenador;
+import java.util.List;
+
+
+public interface IEntrenadorDAO {
+    void insertar(Entrenador entrenador);
+    void actualizar(Entrenador entrenador);
+    void eliminar(String cedula);
+    Entrenador buscarPorCedula(String cedula);
+    List<Entrenador> listarTodos();
+}
