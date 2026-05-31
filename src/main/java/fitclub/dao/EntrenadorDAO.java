@@ -73,28 +73,13 @@ public class EntrenadorDAO implements IEntrenadorDAO {
     }
 
     @Override
-    public void eliminar(String cedula) {
-        String sqlEntrenador = "DELETE FROM entrenador WHERE cedula = ?";
-        String sqlPersona = "DELETE FROM persona WHERE cedula = ?";
-        Connection con = Conexion.getInstancia();
-        try {
-            con.setAutoCommit(false);
-            try (PreparedStatement psEntrenador = con.prepareStatement(sqlEntrenador);
-                 PreparedStatement psPersona = con.prepareStatement(sqlPersona)) {
-
-                psEntrenador.setString(1, cedula);
-                psEntrenador.executeUpdate();
-
-                psPersona.setString(1, cedula);
-                psPersona.executeUpdate();
-
-                con.commit();
-            }
+    public void desactivar(String cedula) {
+        String sql = "UPDATE entrenador SET activo = false WHERE cedula = ?";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, cedula);
+            ps.executeUpdate();
         } catch (SQLException e) {
-            try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            throw new RuntimeException("Error al eliminar entrenador: " + e.getMessage(), e);
-        } finally {
-            try { con.setAutoCommit(true); } catch (SQLException e) { e.printStackTrace(); }
+            throw new RuntimeException("Error al desactivar entrenador: " + e.getMessage(), e);
         }
     }
 
@@ -140,6 +125,29 @@ public class EntrenadorDAO implements IEntrenadorDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al listar entrenadores: " + e.getMessage(), e);
+        }
+        return lista;
+    }
+
+    @Override
+    public List<Entrenador> listarActivos() {
+        List<Entrenador> lista = new ArrayList<>();
+        String sql = "SELECT p.cedula, p.nombre, p.telefono, e.especialidad, e.horario " +
+                "FROM persona p JOIN entrenador e ON p.cedula = e.cedula " +
+                "WHERE e.activo = true";
+        try (Statement st = Conexion.getInstancia().createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(new Entrenador(
+                        rs.getString("cedula"),
+                        rs.getString("nombre"),
+                        rs.getString("telefono"),
+                        rs.getString("especialidad"),
+                        rs.getString("horario")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar entrenadores activos: " + e.getMessage(), e);
         }
         return lista;
     }
