@@ -74,4 +74,20 @@ public class ClienteService {
         clienteDAO.actualizar(cliente);
     }
 
+    /**
+     * Elimina un cliente del sistema por su cédula.
+     * Valida que el cliente exista antes de eliminar.
+     *
+     * @param cedula Cédula del cliente a eliminar.
+     * @throws IllegalArgumentException si la cédula es nula, vacía o el cliente no existe.
+     */
+    public void eliminarCliente(String cedula) {
+        if (cedula == null || cedula.trim().isEmpty()) {
+            throw new IllegalArgumentException("La cédula no puede estar vacía.");
+        }
+        if (clienteDAO.buscarPorCedula(cedula) == null) {
+            throw new IllegalArgumentException("No existe un cliente con la cédula: " + cedula);
+        }
+        clienteDAO.eliminar(cedula);
+    }
 }
