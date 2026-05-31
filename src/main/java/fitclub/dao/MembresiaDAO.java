@@ -59,8 +59,8 @@ public class MembresiaDAO implements IMembresiaDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Membresia(
-                            rs.getString("tipo"),
                             rs.getInt("id_membresia"),
+                            rs.getString("tipo"),
                             rs.getDate("fecha_inicio").toLocalDate(),
                             rs.getDate("fecha_vencimiento").toLocalDate()
                     );
@@ -81,8 +81,8 @@ public class MembresiaDAO implements IMembresiaDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     lista.add(new Membresia(
-                            rs.getString("tipo"),
                             rs.getInt("id_membresia"),
+                            rs.getString("tipo"),
                             rs.getDate("fecha_inicio").toLocalDate(),
                             rs.getDate("fecha_vencimiento").toLocalDate()
                     ));
