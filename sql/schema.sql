@@ -1,4 +1,5 @@
 
+
 CREATE TABLE persona (
     cedula      VARCHAR(20)  NOT NULL,
     nombre      VARCHAR(100) NOT NULL,
@@ -43,7 +44,7 @@ CREATE TABLE membresia (
     tipo              tipo_membresia   NOT NULL,
     fecha_inicio      DATE         NOT NULL,
     fecha_vencimiento DATE         NOT NULL,
-    estado            estado_membresia NOT NULL DEFAULT 'activa',
+    activo            BOOLEAN DEFAULT true;
     CONSTRAINT pk_membresia        PRIMARY KEY (id_membresia),
     CONSTRAINT fk_membresia_cliente FOREIGN KEY (cliente_cedula)
         REFERENCES cliente(cedula)
