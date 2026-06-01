@@ -5,14 +5,7 @@ import fitclub.model.Rutina;
 import fitclub.service.RutinaService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.time.LocalDate;
 
 /**
@@ -29,10 +22,10 @@ public class RutinaForm extends JPanel {
     private JTable tablaRutinas;
     private DefaultTableModel modeloTabla;
 
-    private RutinaService rutinaService;
+    private final RutinaService rutinaService;
 
     public RutinaForm() {
-        rutinaService = new RutinaService(new RutinaDAO());
+        this.rutinaService = new RutinaService(new RutinaDAO());
         initComponents();
     }
 
@@ -41,20 +34,17 @@ public class RutinaForm extends JPanel {
         setBackground(new Color(242, 245, 250));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // ===== TÍTULO =====
         JLabel titulo = new JLabel("🏃  Gestión de Rutinas");
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
         titulo.setForeground(new Color(31, 56, 100));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         add(titulo, BorderLayout.NORTH);
 
-        // ===== PANEL DE CAMPOS =====
         JPanel panelCampos = new JPanel(new GridBagLayout());
         panelCampos.setBackground(Color.WHITE);
         panelCampos.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247), 1),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -80,15 +70,12 @@ public class RutinaForm extends JPanel {
         gbc.gridx = 1; txtDescripcion = new JTextField(15);
         panelCampos.add(txtDescripcion, gbc);
 
-        // ===== PANEL DE BOTONES =====
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
-
-        JButton btnGuardar = crearBoton("Guardar", new Color(46, 95, 163));
-        JButton btnBuscar = crearBoton("Buscar", new Color(46, 95, 163));
+        JButton btnGuardar  = crearBoton("Guardar",  new Color(46, 95, 163));
+        JButton btnBuscar   = crearBoton("Buscar",   new Color(46, 95, 163));
         JButton btnEliminar = crearBoton("Eliminar", new Color(180, 50, 50));
-        JButton btnLimpiar = crearBoton("Limpiar", new Color(100, 100, 100));
-
+        JButton btnLimpiar  = crearBoton("Limpiar",  new Color(100, 100, 100));
         panelBotones.add(btnGuardar);
         panelBotones.add(btnBuscar);
         panelBotones.add(btnEliminar);
@@ -100,7 +87,6 @@ public class RutinaForm extends JPanel {
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
         add(panelSuperior, BorderLayout.WEST);
 
-        // ===== TABLA =====
         modeloTabla = new DefaultTableModel(
                 new String[]{"ID", "Descripción", "Fecha Asignación"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -117,13 +103,10 @@ public class RutinaForm extends JPanel {
         panelTabla.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247)),
                 "Rutinas del cliente", 0, 0,
-                new Font("Arial", Font.BOLD, 13),
-                new Color(31, 56, 100)
-        ));
+                new Font("Arial", Font.BOLD, 13), new Color(31, 56, 100)));
         panelTabla.add(new JScrollPane(tablaRutinas), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
-        // ===== ACCIONES =====
         btnGuardar.addActionListener(e -> guardarRutina());
         btnBuscar.addActionListener(e -> buscarRutinas());
         btnEliminar.addActionListener(e -> eliminarRutina());
@@ -157,11 +140,15 @@ public class RutinaForm extends JPanel {
             JOptionPane.showMessageDialog(this, "La descripción es obligatoria.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        Rutina rutina = new Rutina(0, txtDescripcion.getText(), LocalDate.now());
-        rutinaService.asignarRutina(rutina, txtClienteCedula.getText(), txtEntrenadorCedula.getText());
-        JOptionPane.showMessageDialog(this, "Rutina asignada correctamente.");
-        buscarRutinas();
-        limpiarCampos();
+        try {
+            Rutina rutina = new Rutina(0, txtDescripcion.getText(), LocalDate.now());
+            rutinaService.asignarRutina(rutina, txtClienteCedula.getText(), txtEntrenadorCedula.getText());
+            JOptionPane.showMessageDialog(this, "Rutina asignada correctamente.");
+            buscarRutinas();
+            limpiarCampos();
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void buscarRutinas() {
@@ -172,11 +159,9 @@ public class RutinaForm extends JPanel {
         modeloTabla.setRowCount(0);
         rutinaService.consultarRutinasCliente(txtClienteCedula.getText()).forEach(r ->
                 modeloTabla.addRow(new Object[]{
-                        r.getIdRutina(),
-                        r.getDescripcion(),
+                        r.getIdRutina(), r.getDescripcion(),
                         r.getFechaAsignacion().toString()
-                })
-        );
+                }));
     }
 
     private void eliminarRutina() {
@@ -185,7 +170,8 @@ public class RutinaForm extends JPanel {
             return;
         }
         try {
-            int confirmar = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar esta rutina?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            int confirmar = JOptionPane.showConfirmDialog(this,
+                    "¿Está seguro de eliminar esta rutina?", "Confirmar", JOptionPane.YES_NO_OPTION);
             if (confirmar == JOptionPane.YES_OPTION) {
                 rutinaService.eliminarRutina(Integer.parseInt(txtIdRutina.getText()));
                 JOptionPane.showMessageDialog(this, "Rutina eliminada correctamente.");
@@ -194,6 +180,8 @@ public class RutinaForm extends JPanel {
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "El ID debe ser un número.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

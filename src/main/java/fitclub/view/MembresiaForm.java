@@ -1,16 +1,15 @@
 package fitclub.view;
 
 import fitclub.dao.MembresiaDAO;
+import fitclub.dao.PagoDAO;
 import fitclub.model.Membresia;
+import fitclub.model.Pago;
+import fitclub.service.MembresiaService;
+import fitclub.service.PagoService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.time.LocalDate;
-import fitclub.dao.PagoDAO;
-import fitclub.model.Pago;
 import java.util.List;
 
 /**
@@ -26,12 +25,12 @@ public class MembresiaForm extends JPanel {
     private JTable tablaMembresias;
     private DefaultTableModel modeloTabla;
 
-    private MembresiaDAO membresiaDAO;
-    private PagoDAO pagoDAO;
+    private final MembresiaService membresiaService;
+    private final PagoService pagoService;
 
     public MembresiaForm() {
-        membresiaDAO = new MembresiaDAO();
-        pagoDAO = new PagoDAO();
+        this.membresiaService = new MembresiaService(new MembresiaDAO());
+        this.pagoService = new PagoService(new PagoDAO());
         initComponents();
     }
 
@@ -40,27 +39,24 @@ public class MembresiaForm extends JPanel {
         setBackground(new Color(242, 245, 250));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // ===== TÍTULO =====
         JLabel titulo = new JLabel("💳  Gestión de Membresías");
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
         titulo.setForeground(new Color(31, 56, 100));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         add(titulo, BorderLayout.NORTH);
 
-        // ===== PANEL DE CAMPOS =====
         JPanel panelCampos = new JPanel(new GridBagLayout());
         panelCampos.setBackground(Color.WHITE);
         panelCampos.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247), 1),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        panelCampos.add(new JLabel("ID Membresía (solo para buscar/eliminar):"), gbc);
+        panelCampos.add(new JLabel("ID Membresía (solo para buscar/cancelar):"), gbc);
         gbc.gridx = 1; txtIdMembresia = new JTextField(15);
         panelCampos.add(txtIdMembresia, gbc);
 
@@ -71,21 +67,18 @@ public class MembresiaForm extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 2;
         panelCampos.add(new JLabel("Tipo:"), gbc);
-        gbc.gridx = 1; cmbTipo = new JComboBox<>(new String[]{"mensual", "trimestral", "anual"});
+        gbc.gridx = 1; cmbTipo = new JComboBox<>(new String[]{"mensual", "trimestral", "semestral", "anual"});
         panelCampos.add(cmbTipo, gbc);
 
-        // ===== PANEL DE BOTONES =====
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
-
-        JButton btnGuardar = crearBoton("Guardar", new Color(46, 95, 163));
-        JButton btnBuscar = crearBoton("Buscar", new Color(46, 95, 163));
-        JButton btnEliminar = crearBoton("Eliminar", new Color(180, 50, 50));
-        JButton btnLimpiar = crearBoton("Limpiar", new Color(100, 100, 100));
-
+        JButton btnGuardar  = crearBoton("Guardar",   new Color(46, 95, 163));
+        JButton btnBuscar   = crearBoton("Buscar",    new Color(46, 95, 163));
+        JButton btnCancelar = crearBoton("Cancelar",  new Color(180, 50, 50));
+        JButton btnLimpiar  = crearBoton("Limpiar",   new Color(100, 100, 100));
         panelBotones.add(btnGuardar);
         panelBotones.add(btnBuscar);
-        panelBotones.add(btnEliminar);
+        panelBotones.add(btnCancelar);
         panelBotones.add(btnLimpiar);
 
         JPanel panelSuperior = new JPanel(new BorderLayout());
@@ -94,9 +87,8 @@ public class MembresiaForm extends JPanel {
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
         add(panelSuperior, BorderLayout.WEST);
 
-        // ===== TABLA =====
         modeloTabla = new DefaultTableModel(
-                new String[]{"ID", "Tipo", "Fecha Inicio", "Fecha Vencimiento", "Vigente"}, 0) {
+                new String[]{"ID", "Tipo", "Fecha Inicio", "Fecha Vencimiento", "Estado"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tablaMembresias = new JTable(modeloTabla);
@@ -111,16 +103,13 @@ public class MembresiaForm extends JPanel {
         panelTabla.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247)),
                 "Membresías registradas", 0, 0,
-                new Font("Arial", Font.BOLD, 13),
-                new Color(31, 56, 100)
-        ));
+                new Font("Arial", Font.BOLD, 13), new Color(31, 56, 100)));
         panelTabla.add(new JScrollPane(tablaMembresias), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
-        // ===== ACCIONES =====
         btnGuardar.addActionListener(e -> guardarMembresia());
         btnBuscar.addActionListener(e -> buscarMembresia());
-        btnEliminar.addActionListener(e -> eliminarMembresia());
+        btnCancelar.addActionListener(e -> cancelarMembresia());
         btnLimpiar.addActionListener(e -> limpiarCampos());
 
         tablaMembresias.getSelectionModel().addListSelectionListener(e -> {
@@ -144,10 +133,10 @@ public class MembresiaForm extends JPanel {
 
     private LocalDate calcularFechaVencimiento(String tipo, LocalDate inicio) {
         return switch (tipo) {
-            case "mensual"     -> inicio.plusMonths(1);
-            case "trimestral"  -> inicio.plusMonths(3);
-            case "anual"       -> inicio.plusYears(1);
-            default            -> inicio.plusMonths(1);
+            case "trimestral" -> inicio.plusMonths(3);
+            case "semestral"  -> inicio.plusMonths(6);
+            case "anual"      -> inicio.plusYears(1);
+            default           -> inicio.plusMonths(1);
         };
     }
 
@@ -156,33 +145,29 @@ public class MembresiaForm extends JPanel {
             JOptionPane.showMessageDialog(this, "La cédula del cliente es obligatoria.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        String tipo = (String) cmbTipo.getSelectedItem();
-        LocalDate fechaInicio = LocalDate.now();
-        LocalDate fechaVencimiento = calcularFechaVencimiento(tipo, fechaInicio);
+        try {
+            String tipo = (String) cmbTipo.getSelectedItem();
+            LocalDate fechaInicio = LocalDate.now();
+            LocalDate fechaVencimiento = calcularFechaVencimiento(tipo, fechaInicio);
 
-        Membresia membresia = new Membresia(tipo, 0, fechaInicio, fechaVencimiento);
-        membresiaDAO.insertar(membresia, txtClienteCedula.getText());
+            Membresia membresia = new Membresia(0, tipo, fechaInicio, fechaVencimiento);
+            membresiaService.registrarMembresia(membresia, txtClienteCedula.getText());
 
-        // Calcular monto según tipo
-        double monto = switch (tipo) {
-            case "mensual"    -> 50000;
-            case "trimestral" -> 130000;
-            case "anual"      -> 480000;
-            default           -> 50000;
-        };
+            // Registrar pago automáticamente usando el service
+            List<Membresia> membresias = membresiaService.listarMembresiasCliente(txtClienteCedula.getText());
+            if (!membresias.isEmpty()) {
+                Membresia ultima = membresias.get(membresias.size() - 1);
+                Pago pago = new Pago(0, ultima.calcularTotal(), LocalDate.now(), "efectivo");
+                pagoService.registrarPago(pago, ultima.getIdMembresia());
+            }
 
-        // Registrar pago automáticamente
-        List<Membresia> membresias = membresiaDAO.listarPorCliente(txtClienteCedula.getText());
-        if (!membresias.isEmpty()) {
-            Membresia ultima = membresias.get(membresias.size() - 1);
-            Pago pago = new Pago(0, monto, LocalDate.now(), "efectivo");
-            pagoDAO.insertar(pago, ultima.getIdMembresia());
+            JOptionPane.showMessageDialog(this,
+                    "Membresía guardada.\nInicio: " + fechaInicio + "\nVencimiento: " + fechaVencimiento);
+            cargarTabla();
+            limpiarCampos();
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        JOptionPane.showMessageDialog(this,
-                "Membresía guardada.\nInicio: " + fechaInicio + "\nVencimiento: " + fechaVencimiento);
-        cargarTabla();
-        limpiarCampos();
     }
 
     private void buscarMembresia() {
@@ -193,35 +178,38 @@ public class MembresiaForm extends JPanel {
         cargarTabla();
     }
 
-    private void eliminarMembresia() {
+    private void cancelarMembresia() {
         if (txtIdMembresia.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese un ID para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ingrese un ID para cancelar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {
-            int confirmar = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar esta membresía?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            int confirmar = JOptionPane.showConfirmDialog(this,
+                    "¿Está seguro de cancelar esta membresía?\nEl historial de pagos se conservará.",
+                    "Confirmar", JOptionPane.YES_NO_OPTION);
             if (confirmar == JOptionPane.YES_OPTION) {
-                membresiaDAO.eliminar(Integer.parseInt(txtIdMembresia.getText()));
-                JOptionPane.showMessageDialog(this, "Membresía eliminada correctamente.");
+                membresiaService.cancelarMembresia(Integer.parseInt(txtIdMembresia.getText()));
+                JOptionPane.showMessageDialog(this, "Membresía cancelada correctamente.");
                 cargarTabla();
                 limpiarCampos();
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "El ID debe ser un número.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void cargarTabla() {
         modeloTabla.setRowCount(0);
-        membresiaDAO.listarPorCliente(txtClienteCedula.getText()).forEach(m ->
+        if (txtClienteCedula.getText().isEmpty()) return;
+        membresiaService.listarMembresiasCliente(txtClienteCedula.getText()).forEach(m ->
                 modeloTabla.addRow(new Object[]{
-                        m.getIdMembresia(),
-                        m.getTipo(),
+                        m.getIdMembresia(), m.getTipo(),
                         m.getFechaInicio().toString(),
                         m.getFechaVencimiento().toString(),
-                        m.estaVigente() ? "✅ Sí" : "❌ No"
-                })
-        );
+                        m.estaVigente() ? "✅ Vigente" : "❌ Vencida"
+                }));
     }
 
     private void limpiarCampos() {

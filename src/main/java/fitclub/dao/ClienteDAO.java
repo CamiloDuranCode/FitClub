@@ -68,28 +68,13 @@ public class ClienteDAO implements IClienteDAO {
     }
 
     @Override
-    public void eliminar(String cedula) {
-        String sqlCliente = "DELETE FROM cliente WHERE cedula = ?";
-        String sqlPersona = "DELETE FROM persona WHERE cedula = ?";
-        Connection con = Conexion.getInstancia();
-        try {
-            con.setAutoCommit(false);
-            try (PreparedStatement psCliente = con.prepareStatement(sqlCliente);
-                 PreparedStatement psPersona = con.prepareStatement(sqlPersona)) {
-
-                psCliente.setString(1, cedula);
-                psCliente.executeUpdate();
-
-                psPersona.setString(1, cedula);
-                psPersona.executeUpdate();
-
-                con.commit();
-            }
+    public void desactivar(String cedula) {
+        String sql = "UPDATE cliente SET activo = false WHERE cedula = ?";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, cedula);
+            ps.executeUpdate();
         } catch (SQLException e) {
-            try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            throw new RuntimeException("Error al eliminar cliente: " + e.getMessage(), e);
-        } finally {
-            try { con.setAutoCommit(true); } catch (SQLException e) { e.printStackTrace(); }
+            throw new RuntimeException("Error al desactivar cliente: " + e.getMessage(), e);
         }
     }
 
@@ -134,6 +119,29 @@ public class ClienteDAO implements IClienteDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al listar clientes: " + e.getMessage(), e);
+        }
+        return lista;
+    }
+
+    @Override
+    public List<Cliente> listarActivos() {
+        List<Cliente> lista = new ArrayList<>();
+        String sql = "SELECT p.cedula, p.nombre, p.telefono, c.fecha_nacimiento, c.direccion " +
+                "FROM persona p JOIN cliente c ON p.cedula = c.cedula " +
+                "WHERE c.activo = true";
+        try (Statement st = Conexion.getInstancia().createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(new Cliente(
+                        rs.getString("cedula"),
+                        rs.getString("nombre"),
+                        rs.getString("telefono"),
+                        rs.getDate("fecha_nacimiento").toLocalDate(),
+                        rs.getString("direccion")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar clientes activos: " + e.getMessage(), e);
         }
         return lista;
     }

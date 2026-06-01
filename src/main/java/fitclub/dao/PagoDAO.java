@@ -12,8 +12,6 @@ import java.util.List;
  */
 public class PagoDAO implements IPagoDAO {
 
-    private Connection con;
-
     @Override
     public void insertar(Pago pago, int membresiaId) {
         String sql = "INSERT INTO pago (membresia_id, monto, fecha_pago, metodo_pago) VALUES (?, ?, ?, ?)";
@@ -30,7 +28,7 @@ public class PagoDAO implements IPagoDAO {
 
     @Override
     public void actualizar(Pago pago) {
-        String sql = "UPDATE Pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
+        String sql = "UPDATE pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setDouble(1, pago.getMonto());
             ps.setDate(2, Date.valueOf(pago.getFechaPago()));
@@ -91,7 +89,7 @@ public class PagoDAO implements IPagoDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error al listar pagos: " + e.getMessage(), e);
+            throw new RuntimeException("Error al listar pagos por membresía: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -111,7 +109,7 @@ public class PagoDAO implements IPagoDAO {
                 ));
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar pagos: " + e.getMessage());
+            throw new RuntimeException("Error al listar todos los pagos: " + e.getMessage(), e);
         }
         return lista;
     }

@@ -41,13 +41,13 @@ public class MembresiaDAO implements IMembresiaDAO {
     }
 
     @Override
-    public void eliminar(int idMembresia) {
-        String sql = "DELETE FROM membresia WHERE id_membresia = ?";
+    public void cancelar(int idMembresia) {
+        String sql = "UPDATE membresia SET activo = false WHERE id_membresia = ?";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idMembresia);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Error al eliminar membresía: " + e.getMessage(), e);
+            throw new RuntimeException("Error al cancelar membresía: " + e.getMessage(), e);
         }
     }
 
@@ -59,8 +59,8 @@ public class MembresiaDAO implements IMembresiaDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Membresia(
-                            rs.getString("tipo"),
                             rs.getInt("id_membresia"),
+                            rs.getString("tipo"),
                             rs.getDate("fecha_inicio").toLocalDate(),
                             rs.getDate("fecha_vencimiento").toLocalDate()
                     );
@@ -81,8 +81,8 @@ public class MembresiaDAO implements IMembresiaDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     lista.add(new Membresia(
-                            rs.getString("tipo"),
                             rs.getInt("id_membresia"),
+                            rs.getString("tipo"),
                             rs.getDate("fecha_inicio").toLocalDate(),
                             rs.getDate("fecha_vencimiento").toLocalDate()
                     ));
@@ -90,6 +90,28 @@ public class MembresiaDAO implements IMembresiaDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al listar membresías: " + e.getMessage(), e);
+        }
+        return lista;
+    }
+
+    @Override
+    public List<Membresia> listarActivasPorCliente(String clienteCedula) {
+        List<Membresia> lista = new ArrayList<>();
+        String sql = "SELECT * FROM membresia WHERE cliente_cedula = ? AND activo = true";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, clienteCedula);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Membresia(
+                            rs.getInt("id_membresia"),
+                            rs.getString("tipo"),
+                            rs.getDate("fecha_inicio").toLocalDate(),
+                            rs.getDate("fecha_vencimiento").toLocalDate()
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar membresías activas: " + e.getMessage(), e);
         }
         return lista;
     }

@@ -26,7 +26,7 @@ public class Membresia implements ICalculable {
      * @param fechaInicio      Fecha de inicio de la membresía.
      * @param fechaVencimiento Fecha de vencimiento de la membresía.
      */
-    public Membresia(String tipo, int idMembresia, LocalDate fechaInicio, LocalDate fechaVencimiento) {
+    public Membresia(int idMembresia, String tipo, LocalDate fechaInicio, LocalDate fechaVencimiento) {
         this.tipo = tipo;
         this.idMembresia = idMembresia;
         this.fechaInicio = fechaInicio;
