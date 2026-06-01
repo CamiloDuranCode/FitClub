@@ -1,4 +1,5 @@
 
+
 CREATE TABLE persona (
     cedula      VARCHAR(20)  NOT NULL,
     nombre      VARCHAR(100) NOT NULL,
@@ -12,6 +13,7 @@ CREATE TABLE entrenador (
     cedula       VARCHAR(20)  NOT NULL,
     especialidad VARCHAR(100),
     horario      VARCHAR(100),
+	activo       BOOLEAN DEFAULT true;
     CONSTRAINT pk_entrenador         PRIMARY KEY (cedula),
     CONSTRAINT fk_entrenador_persona FOREIGN KEY (cedula)
         REFERENCES persona(cedula)
@@ -23,6 +25,7 @@ CREATE TABLE cliente (
     fecha_nacimiento  DATE,
     direccion         VARCHAR(200),
     entrenador_cedula VARCHAR(20),
+	activo            BOOLEAN DEFAULT true;
     CONSTRAINT pk_cliente            PRIMARY KEY (cedula),
     CONSTRAINT fk_cliente_persona    FOREIGN KEY (cedula)
         REFERENCES persona(cedula)
@@ -41,7 +44,7 @@ CREATE TABLE membresia (
     tipo              tipo_membresia   NOT NULL,
     fecha_inicio      DATE         NOT NULL,
     fecha_vencimiento DATE         NOT NULL,
-    estado            estado_membresia NOT NULL DEFAULT 'activa',
+    activo            BOOLEAN DEFAULT true;
     CONSTRAINT pk_membresia        PRIMARY KEY (id_membresia),
     CONSTRAINT fk_membresia_cliente FOREIGN KEY (cliente_cedula)
         REFERENCES cliente(cedula)
@@ -106,3 +109,8 @@ CREATE TABLE progreso (
         REFERENCES rutina(id_rutina)
         ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
+
+
+
+
