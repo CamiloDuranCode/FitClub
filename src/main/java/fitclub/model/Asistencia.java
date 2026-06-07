@@ -1,5 +1,7 @@
 package fitclub.model;
 
+import fitclub.model.enums.TipoAsistencia;
+
 import java.time.LocalDateTime;
 
 /**
@@ -11,6 +13,7 @@ public class Asistencia {
 
     private int idAsistencia;
     private LocalDateTime fechaHora;
+    private TipoAsistencia tipo;
     private String observacion;
 
     /**
@@ -18,12 +21,14 @@ public class Asistencia {
      *
      * @param idAsistencia Identificador único del registro de asistencia.
      * @param fechaHora    Fecha y hora en que se registró la asistencia.
+     * @param tipo         Tipo de asistencia como enum {@link TipoAsistencia}.
      * @param observacion  Observación adicional sobre la visita (puede ser vacía).
      */
 
-    public Asistencia(int idAsistencia, LocalDateTime fechaHora, String observacion) {
+    public Asistencia(int idAsistencia, LocalDateTime fechaHora, TipoAsistencia tipo, String observacion) {
         this.idAsistencia = idAsistencia;
         this.fechaHora = fechaHora;
+        this.tipo = tipo;
         this.observacion = observacion;
     }
 
@@ -54,6 +59,18 @@ public class Asistencia {
         if (fechaHora.isAfter(LocalDateTime.now()))
             throw new IllegalArgumentException("No se puede registrar una asistencia con fecha futura");
         this.fechaHora = fechaHora;
+    }
+
+    public TipoAsistencia getTipo() { return tipo; }
+
+    /**
+     * Establece el tipo de asistencia.
+     *
+     * @param tipo Valor del enum {@link TipoAsistencia}. No puede ser nulo.
+     */
+    public void setTipo(TipoAsistencia tipo) {
+        if (tipo == null) throw new IllegalArgumentException("El tipo de asistencia no puede ser nulo.");
+        this.tipo = tipo;
     }
 
     public String getObservacion() {
