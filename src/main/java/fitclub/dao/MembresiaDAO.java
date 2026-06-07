@@ -17,7 +17,7 @@ public class MembresiaDAO implements IMembresiaDAO {
         String sql = "INSERT INTO membresia (cliente_cedula, tipo, fecha_inicio, fecha_vencimiento) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
-            ps.setObject(2, membresia.getTipo(), java.sql.Types.OTHER);
+            ps.setObject(2, membresia.getTipo().toLowerCase(), Types.OTHER);
             ps.setDate(3, Date.valueOf(membresia.getFechaInicio()));
             ps.setDate(4, Date.valueOf(membresia.getFechaVencimiento()));
             ps.executeUpdate();
@@ -30,7 +30,7 @@ public class MembresiaDAO implements IMembresiaDAO {
     public void actualizar(Membresia membresia) {
         String sql = "UPDATE membresia SET tipo = ?, fecha_inicio = ?, fecha_vencimiento = ? WHERE id_membresia = ?";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
-            ps.setString(1, membresia.getTipo());
+            ps.setObject(1, membresia.getTipo().toLowerCase(), Types.OTHER);
             ps.setDate(2, Date.valueOf(membresia.getFechaInicio()));
             ps.setDate(3, Date.valueOf(membresia.getFechaVencimiento()));
             ps.setInt(4, membresia.getIdMembresia());
