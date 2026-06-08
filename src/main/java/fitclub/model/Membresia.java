@@ -1,5 +1,7 @@
 package fitclub.model;
 
+import fitclub.model.enums.TipoMembresia;
+
 import java.time.LocalDate;
 
 /**
@@ -14,7 +16,7 @@ public class Membresia implements ICalculable {
     private static final double VALOR_BASE_MENSUAL = 80000.0;
 
     private int idMembresia;
-    private String tipo;
+    private TipoMembresia tipo;
     private LocalDate fechaInicio;
     private LocalDate fechaVencimiento;
 
@@ -26,9 +28,10 @@ public class Membresia implements ICalculable {
      * @param fechaInicio      Fecha de inicio de la membresía.
      * @param fechaVencimiento Fecha de vencimiento de la membresía.
      */
-    public Membresia(int idMembresia, String tipo, LocalDate fechaInicio, LocalDate fechaVencimiento) {
-        this.tipo = tipo;
+
+    public Membresia(int idMembresia, TipoMembresia tipo, LocalDate fechaInicio, LocalDate fechaVencimiento) {
         this.idMembresia = idMembresia;
+        this.tipo = tipo;
         this.fechaInicio = fechaInicio;
         this.fechaVencimiento = fechaVencimiento;
     }
@@ -42,10 +45,10 @@ public class Membresia implements ICalculable {
      */
     @Override
     public double calcularTotal() {
-        return switch (tipo.toLowerCase()) {
-            case "trimestral" -> VALOR_BASE_MENSUAL * 3;
-            case "semestral"  -> VALOR_BASE_MENSUAL * 6;
-            case "anual"      -> VALOR_BASE_MENSUAL * 12;
+        return switch (tipo) {
+            case TRIMESTRAL -> VALOR_BASE_MENSUAL * 3;
+            case SEMESTRAL  -> VALOR_BASE_MENSUAL * 6;
+            case ANUAL      -> VALOR_BASE_MENSUAL * 12;
             default           -> VALOR_BASE_MENSUAL; // mensual
         };
     }
@@ -69,7 +72,7 @@ public class Membresia implements ICalculable {
         this.idMembresia = idMembresia;
     }
 
-    public String getTipo() {
+    public TipoMembresia getTipo() {
         return tipo;
     }
 
@@ -78,8 +81,8 @@ public class Membresia implements ICalculable {
      *
      * @param tipo Debe ser mensual, trimestral, semestral o anual.
      */
-    public void setTipo(String tipo) {
-        if (tipo == null || tipo.trim().isEmpty()) throw new IllegalArgumentException("El tipo de membresía no puede estar vacío.");
+    public void setTipo(TipoMembresia tipo) {
+        if (tipo == null) throw new IllegalArgumentException("El tipo de membresía no puede estar vacío.");
         this.tipo = tipo;
     }
 
