@@ -1,5 +1,7 @@
 package fitclub.view;
 
+import fitclub.model.enums.RolUsuario;
+import fitclub.service.SeccionActual;
 import javax.swing.*;
 import java.awt.*;
 
@@ -50,20 +52,39 @@ public class MainFrame extends JFrame {
         menuLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         sidebar.add(menuLabel);
 
-        sidebar.add(crearBotonMenu("👥  Clientes", "Clientes"));
-        sidebar.add(Box.createVerticalStrut(8));
-        sidebar.add(crearBotonMenu("💪  Entrenadores", "Entrenadores"));
-        sidebar.add(Box.createVerticalStrut(8));
-        sidebar.add(crearBotonMenu("💳  Membresías", "Membresias"));
-        sidebar.add(Box.createVerticalStrut(8));
-        sidebar.add(crearBotonMenu("📋  Asistencia", "Asistencia"));
-        sidebar.add(Box.createVerticalStrut(8));
-        sidebar.add(crearBotonMenu("🏃  Rutinas", "Rutinas"));
-        sidebar.add(Box.createVerticalStrut(8));
-        sidebar.add(crearBotonMenu("📊  Reportes", "Reportes"));
+        RolUsuario rol = SeccionActual.getInstancia().getRolActual();
+
+        // admin y recepcionista ven todo
+        if (rol == RolUsuario.ADMIN || rol == RolUsuario.RECEPCIONISTA) {
+            sidebar.add(crearBotonMenu("👥  Clientes", "Clientes"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("💪  Entrenadores", "Entrenadores"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("💳  Membresías", "Membresias"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("📋  Asistencia", "Asistencia"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("🏃  Rutinas", "Rutinas"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("📊  Reportes", "Reportes"));
+        }
+
+        // entrenador solo ve Rutinas y Turnos
+        if (rol == RolUsuario.ENTRENADOR) {
+            sidebar.add(crearBotonMenu("🏃  Rutinas", "Rutinas"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("🕐  Turnos", "Turnos"));
+        }
+
+        // solo admin ve Usuarios
+        if (rol == RolUsuario.ADMIN) {
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("🔑  Usuarios", "Usuarios"));
+        }
+
         sidebar.add(Box.createVerticalGlue());
 
-        JLabel version = new JLabel("v1.0.0 — 2025");
+        JLabel version = new JLabel("v2.0.0 — 2026");
         version.setFont(new Font("Arial", Font.PLAIN, 10));
         version.setForeground(new Color(180, 200, 230));
         version.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -123,6 +144,8 @@ public class MainFrame extends JFrame {
             case "Asistencia"   -> contenedor.add(new AsistenciaForm(), BorderLayout.CENTER);
             case "Rutinas"      -> contenedor.add(new RutinaForm(), BorderLayout.CENTER);
             case "Reportes"     -> contenedor.add(new ReportePanel(), BorderLayout.CENTER);
+            case "Usuarios"     -> contenedor.add(new UsuarioAdminPanel(), BorderLayout.CENTER);
+            case "Turnos"       -> contenedor.add(new TurnoForm(), BorderLayout.CENTER);
             default -> {
                 JLabel proximamente = new JLabel("Módulo en desarrollo...", SwingConstants.CENTER);
                 proximamente.setFont(new Font("Arial", Font.PLAIN, 15));

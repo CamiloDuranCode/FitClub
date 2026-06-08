@@ -1,5 +1,7 @@
 package fitclub.model;
 
+import fitclub.model.enums.MetodoPago;
+
 import java.time.LocalDate;
 
 /**
@@ -13,7 +15,7 @@ public class Pago implements ICalculable {
     private int idPago;
     private double monto;
     private LocalDate fechaPago;
-    private String metodoPago;
+    private MetodoPago metodoPago;
 
     /**
      * Constructor de Pago.
@@ -23,7 +25,7 @@ public class Pago implements ICalculable {
      * @param fechaPago  Fecha en que se realizó el pago.
      * @param metodoPago Método de pago utilizado (efectivo, transferencia, etc).
      */
-    public Pago(int idPago, double monto, LocalDate fechaPago, String metodoPago) {
+    public Pago(int idPago, double monto, LocalDate fechaPago, MetodoPago metodoPago) {
         this.idPago = idPago;
         this.monto = monto;
         this.fechaPago = fechaPago;
@@ -84,12 +86,12 @@ public class Pago implements ICalculable {
         this.fechaPago = fechaPago;
     }
 
-    public String getMetodoPago() {
+    public MetodoPago getMetodoPago() {
         return metodoPago;
     }
 
-    public void setMetodoPago(String metodoPago) {
-        if (metodoPago == null || metodoPago.trim().isEmpty()) throw new IllegalArgumentException("El método de pago no puede estar vacío.");
+    public void setMetodoPago(MetodoPago metodoPago) {
+        if (metodoPago == null) throw new IllegalArgumentException("El método de pago no puede estar vacío.");
         this.metodoPago = metodoPago;
     }
 }
