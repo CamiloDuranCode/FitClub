@@ -74,4 +74,30 @@ public class ClienteService {
         clienteDAO.actualizar(cliente);
     }
 
+    /**
+     * Desactiva un cliente del sistema por su cédula.
+     * El cliente deja de aparecer en las listas activas pero
+     * su historial de pagos, membresías y asistencia se conserva.
+     *
+     * @param cedula Cédula del cliente a desactivar.
+     * @throws IllegalArgumentException si la cédula es nula, vacía o el cliente no existe.
+     */
+    public void desactivarCliente(String cedula) {
+        if (cedula == null || cedula.trim().isEmpty()) {
+            throw new IllegalArgumentException("La cédula no puede estar vacía.");
+        }
+        if (clienteDAO.buscarPorCedula(cedula) == null) {
+            throw new IllegalArgumentException("No existe un cliente con la cédula: " + cedula);
+        }
+        clienteDAO.desactivar(cedula);
+    }
+
+    /**
+     * Retorna la lista de clientes activos en el sistema.
+     *
+     * @return Lista de clientes con estado activo.
+     */
+    public List<Cliente> listarClientesActivos() {
+        return clienteDAO.listarActivos();
+    }
 }

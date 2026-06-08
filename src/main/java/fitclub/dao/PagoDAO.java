@@ -1,6 +1,7 @@
 package fitclub.dao;
 
 import fitclub.model.Pago;
+import fitclub.model.enums.MetodoPago;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class PagoDAO implements IPagoDAO {
             ps.setInt(1, membresiaId);
             ps.setDouble(2, pago.getMonto());
             ps.setDate(3, Date.valueOf(pago.getFechaPago()));
-            ps.setObject(4, pago.getMetodoPago(), java.sql.Types.OTHER);
+            ps.setObject(4, pago.getMetodoPago().name().toLowerCase(), Types.OTHER);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al insertar pago: " + e.getMessage(), e);
@@ -28,11 +29,11 @@ public class PagoDAO implements IPagoDAO {
 
     @Override
     public void actualizar(Pago pago) {
-        String sql = "UPDATE Pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
+        String sql = "UPDATE pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setDouble(1, pago.getMonto());
             ps.setDate(2, Date.valueOf(pago.getFechaPago()));
-            ps.setString(3, pago.getMetodoPago());
+            ps.setObject(3, pago.getMetodoPago().name().toLowerCase(), Types.OTHER);
             ps.setInt(4, pago.getIdPago());
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -62,7 +63,7 @@ public class PagoDAO implements IPagoDAO {
                             rs.getInt("id_pago"),
                             rs.getDouble("monto"),
                             rs.getDate("fecha_pago").toLocalDate(),
-                            rs.getString("metodo_pago")
+                            MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
                     );
                 }
             }
@@ -84,12 +85,12 @@ public class PagoDAO implements IPagoDAO {
                             rs.getInt("id_pago"),
                             rs.getDouble("monto"),
                             rs.getDate("fecha_pago").toLocalDate(),
-                            rs.getString("metodo_pago")
+                            MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
                     ));
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error al listar pagos: " + e.getMessage(), e);
+            throw new RuntimeException("Error al listar pagos por membresía: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -105,11 +106,11 @@ public class PagoDAO implements IPagoDAO {
                         rs.getInt("id_pago"),
                         rs.getDouble("monto"),
                         rs.getDate("fecha_pago").toLocalDate(),
-                        rs.getString("metodo_pago")
+                        MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
                 ));
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar pagos: " + e.getMessage());
+            throw new RuntimeException("Error al listar todos los pagos: " + e.getMessage(), e);
         }
         return lista;
     }

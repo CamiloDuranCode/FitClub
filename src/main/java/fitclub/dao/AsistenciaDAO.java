@@ -1,6 +1,7 @@
 package fitclub.dao;
 
 import fitclub.model.Asistencia;
+import fitclub.model.enums.TipoAsistencia;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +15,12 @@ public class AsistenciaDAO implements IAsistenciaDAO {
 
     @Override
     public void insertar(Asistencia asistencia, String clienteCedula) {
-        String sql = "INSERT INTO asistencia (cliente_cedula, fecha_hora, observacion) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO asistencia (cliente_cedula, fecha_hora, tipo, observacion) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
             ps.setTimestamp(2, Timestamp.valueOf(asistencia.getFechaHora()));
-            ps.setString(3, asistencia.getObservacion());
+            ps.setObject(3, asistencia.getTipo().name().toLowerCase(), Types.OTHER);
+            ps.setString(4, asistencia.getObservacion());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al insertar asistencia: " + e.getMessage(), e);
@@ -46,6 +48,7 @@ public class AsistenciaDAO implements IAsistenciaDAO {
                     return new Asistencia(
                             rs.getInt("id_asistencia"),
                             rs.getTimestamp("fecha_hora").toLocalDateTime(),
+                            TipoAsistencia.valueOf(rs.getString("tipo").toUpperCase()),
                             rs.getString("observacion")
                     );
                 }
@@ -67,6 +70,7 @@ public class AsistenciaDAO implements IAsistenciaDAO {
                     lista.add(new Asistencia(
                             rs.getInt("id_asistencia"),
                             rs.getTimestamp("fecha_hora").toLocalDateTime(),
+                            TipoAsistencia.valueOf(rs.getString("tipo").toUpperCase()),
                             rs.getString("observacion")
                     ));
                 }

@@ -60,30 +60,18 @@ public class MembresiaService {
     }
 
     /**
-     * Calcula y retorna el estado de una membresía.
-     * Los posibles estados son: VIGENTE, POR VENCER o VENCIDA.
+     * Cancela una membresía del sistema por su ID.
+     * La membresía deja de estar activa pero su historial
+     * de pagos asociados se conserva.
      *
-     * @param idMembresia ID de la membresía a consultar.
-     * @return Estado de la membresía como String.
+     * @param idMembresia ID de la membresía a cancelar.
      * @throws IllegalArgumentException si la membresía no existe.
      */
-
-    public String calcularEstado(int idMembresia) {
-        Membresia membresia = membresiaDAO.buscarPorId(idMembresia);
-        if (membresia == null) {
+    public void cancelarMembresia(int idMembresia) {
+        if (membresiaDAO.buscarPorId(idMembresia) == null) {
             throw new IllegalArgumentException("No existe una membresía con el ID: " + idMembresia);
         }
-
-        LocalDate hoy = LocalDate.now();
-        long diasRestantes = ChronoUnit.DAYS.between(hoy, membresia.getFechaVencimiento());
-
-        if (diasRestantes < 0) {
-            return "VENCIDA";
-        } else if (diasRestantes <= DIAS_ALERTA) {
-            return "POR VENCER";
-        } else {
-            return "VIGENTE";
-        }
+        membresiaDAO.cancelar(idMembresia);
     }
 
     /**
@@ -137,5 +125,18 @@ public class MembresiaService {
             throw new IllegalArgumentException("La cédula del cliente no puede estar vacía.");
         }
         return membresiaDAO.listarPorCliente(clienteCedula);
+    }
+
+    /**
+     * Retorna las membresías activas de un cliente.
+     *
+     * @param clienteCedula Cédula del cliente.
+     * @return Lista de membresías activas.
+     */
+    public List<Membresia> listarMembresiasActivas(String clienteCedula) {
+        if (clienteCedula == null || clienteCedula.trim().isEmpty()) {
+            throw new IllegalArgumentException("La cédula del cliente no puede estar vacía.");
+        }
+        return membresiaDAO.listarActivasPorCliente(clienteCedula);
     }
 }

@@ -14,7 +14,6 @@ public class MainFrame extends JFrame {
 
     private JPanel sidebar;
     private JPanel contenedor;
-    private JLabel labelTitulo;
 
     public MainFrame() {
         initComponents();
@@ -31,12 +30,10 @@ public class MainFrame extends JFrame {
         JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
         header.setBackground(new Color(31, 56, 100));
         header.setPreferredSize(new Dimension(getWidth(), 55));
-
         JLabel titulo = new JLabel("🏋️  FIT CLUB — Sistema de Gestión");
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
         titulo.setForeground(Color.WHITE);
         header.add(titulo);
-
         add(header, BorderLayout.NORTH);
 
         // ===== SIDEBAR =====
@@ -55,6 +52,8 @@ public class MainFrame extends JFrame {
 
         sidebar.add(crearBotonMenu("👥  Clientes", "Clientes"));
         sidebar.add(Box.createVerticalStrut(8));
+        sidebar.add(crearBotonMenu("💪  Entrenadores", "Entrenadores"));
+        sidebar.add(Box.createVerticalStrut(8));
         sidebar.add(crearBotonMenu("💳  Membresías", "Membresias"));
         sidebar.add(Box.createVerticalStrut(8));
         sidebar.add(crearBotonMenu("📋  Asistencia", "Asistencia"));
@@ -69,35 +68,24 @@ public class MainFrame extends JFrame {
         version.setForeground(new Color(180, 200, 230));
         version.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(version);
-
         add(sidebar, BorderLayout.WEST);
 
         // ===== CONTENEDOR PRINCIPAL =====
         contenedor = new JPanel(new BorderLayout());
         contenedor.setBackground(new Color(242, 245, 250));
 
-        // Panel de bienvenida por defecto
         JPanel bienvenida = new JPanel(new GridBagLayout());
         bienvenida.setBackground(new Color(242, 245, 250));
-
         JLabel lblBienvenida = new JLabel("Selecciona un módulo del menú lateral");
         lblBienvenida.setFont(new Font("Arial", Font.PLAIN, 16));
         lblBienvenida.setForeground(new Color(100, 100, 100));
         bienvenida.add(lblBienvenida);
-
         contenedor.add(bienvenida, BorderLayout.CENTER);
         add(contenedor, BorderLayout.CENTER);
 
         setVisible(true);
     }
 
-    /**
-     * Crea un botón estilizado para el menú lateral.
-     *
-     * @param texto     Texto del botón.
-     * @param modulo    Nombre del módulo a cargar al hacer clic.
-     * @return JButton configurado.
-     */
     private JButton crearBotonMenu(String texto, String modulo) {
         JButton btn = new JButton(texto);
         btn.setMaximumSize(new Dimension(180, 40));
@@ -112,14 +100,8 @@ public class MainFrame extends JFrame {
         btn.setHorizontalAlignment(SwingConstants.LEFT);
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                btn.setBackground(new Color(31, 56, 100));
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                btn.setBackground(new Color(46, 95, 163));
-            }
+            @Override public void mouseEntered(java.awt.event.MouseEvent e) { btn.setBackground(new Color(31, 56, 100)); }
+            @Override public void mouseExited(java.awt.event.MouseEvent e) { btn.setBackground(new Color(46, 95, 163)); }
         });
 
         btn.addActionListener(e -> cargarModulo(modulo));
@@ -135,10 +117,12 @@ public class MainFrame extends JFrame {
     private void cargarModulo(String modulo) {
         contenedor.removeAll();
         switch (modulo) {
-            case "Reportes" -> contenedor.add(new ReportePanel(), BorderLayout.CENTER);
-            case "Clientes"   -> contenedor.add(new ClienteForm(), BorderLayout.CENTER);
-            case "Membresias" -> contenedor.add(new MembresiaForm(), BorderLayout.CENTER);
-            case "Asistencia" -> contenedor.add(new AsistenciaForm(), BorderLayout.CENTER);
+            case "Clientes"     -> contenedor.add(new ClienteForm(), BorderLayout.CENTER);
+            case "Entrenadores" -> contenedor.add(new EntrenadorForm(), BorderLayout.CENTER);
+            case "Membresias"   -> contenedor.add(new MembresiaForm(), BorderLayout.CENTER);
+            case "Asistencia"   -> contenedor.add(new AsistenciaForm(), BorderLayout.CENTER);
+            case "Rutinas"      -> contenedor.add(new RutinaForm(), BorderLayout.CENTER);
+            case "Reportes"     -> contenedor.add(new ReportePanel(), BorderLayout.CENTER);
             default -> {
                 JLabel proximamente = new JLabel("Módulo en desarrollo...", SwingConstants.CENTER);
                 proximamente.setFont(new Font("Arial", Font.PLAIN, 15));

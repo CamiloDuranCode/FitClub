@@ -2,6 +2,7 @@ package fitclub.view;
 
 import fitclub.dao.ClienteDAO;
 import fitclub.model.Cliente;
+import fitclub.service.ClienteService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -23,10 +24,10 @@ public class ClienteForm extends JPanel {
     private JTable tablaClientes;
     private DefaultTableModel modeloTabla;
 
-    private ClienteDAO clienteDAO;
+    private final ClienteService clienteService;
 
     public ClienteForm() {
-        clienteDAO = new ClienteDAO();
+        this.clienteService = new ClienteService(new ClienteDAO());
         initComponents();
         cargarTabla();
     }
@@ -36,53 +37,46 @@ public class ClienteForm extends JPanel {
         setBackground(new Color(242, 245, 250));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // ===== TÍTULO =====
         JLabel titulo = new JLabel("👥  Gestión de Clientes");
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
         titulo.setForeground(new Color(31, 56, 100));
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         add(titulo, BorderLayout.NORTH);
 
-        // ===== PANEL DE CAMPOS =====
-        JPanel panelCampos = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel panelCampos = new JPanel(new GridBagLayout());
         panelCampos.setBackground(Color.WHITE);
         panelCampos.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247), 1),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)));
 
-        panelCampos.add(new JLabel("Cédula:"));
-        txtCedula = new JTextField();
-        panelCampos.add(txtCedula);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        panelCampos.add(new JLabel("Nombre:"));
-        txtNombre = new JTextField();
-        panelCampos.add(txtNombre);
+        gbc.gridx = 0; gbc.gridy = 0; panelCampos.add(new JLabel("Cédula:"), gbc);
+        gbc.gridx = 1; txtCedula = new JTextField(15); panelCampos.add(txtCedula, gbc);
 
-        panelCampos.add(new JLabel("Teléfono:"));
-        txtTelefono = new JTextField();
-        panelCampos.add(txtTelefono);
+        gbc.gridx = 0; gbc.gridy = 1; panelCampos.add(new JLabel("Nombre:"), gbc);
+        gbc.gridx = 1; txtNombre = new JTextField(15); panelCampos.add(txtNombre, gbc);
 
-        panelCampos.add(new JLabel("Fecha Nacimiento (YYYY-MM-DD):"));
-        txtFechaNacimiento = new JTextField();
-        panelCampos.add(txtFechaNacimiento);
+        gbc.gridx = 0; gbc.gridy = 2; panelCampos.add(new JLabel("Teléfono:"), gbc);
+        gbc.gridx = 1; txtTelefono = new JTextField(15); panelCampos.add(txtTelefono, gbc);
 
-        panelCampos.add(new JLabel("Dirección:"));
-        txtDireccion = new JTextField();
-        panelCampos.add(txtDireccion);
+        gbc.gridx = 0; gbc.gridy = 3; panelCampos.add(new JLabel("Fecha Nacimiento (YYYY-MM-DD):"), gbc);
+        gbc.gridx = 1; txtFechaNacimiento = new JTextField(15); panelCampos.add(txtFechaNacimiento, gbc);
 
-        // ===== PANEL DE BOTONES =====
+        gbc.gridx = 0; gbc.gridy = 4; panelCampos.add(new JLabel("Dirección:"), gbc);
+        gbc.gridx = 1; txtDireccion = new JTextField(15); panelCampos.add(txtDireccion, gbc);
+
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
-
-        JButton btnGuardar = crearBoton("Guardar", new Color(46, 95, 163));
-        JButton btnBuscar = crearBoton("Buscar", new Color(46, 95, 163));
-        JButton btnEliminar = crearBoton("Eliminar", new Color(180, 50, 50));
-        JButton btnLimpiar = crearBoton("Limpiar", new Color(100, 100, 100));
-
+        JButton btnGuardar    = crearBoton("Guardar",     new Color(46, 95, 163));
+        JButton btnBuscar     = crearBoton("Buscar",      new Color(46, 95, 163));
+        JButton btnDesactivar = crearBoton("Desactivar",  new Color(180, 50, 50));
+        JButton btnLimpiar    = crearBoton("Limpiar",     new Color(100, 100, 100));
         panelBotones.add(btnGuardar);
         panelBotones.add(btnBuscar);
-        panelBotones.add(btnEliminar);
+        panelBotones.add(btnDesactivar);
         panelBotones.add(btnLimpiar);
 
         JPanel panelSuperior = new JPanel(new BorderLayout());
@@ -91,7 +85,6 @@ public class ClienteForm extends JPanel {
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
         add(panelSuperior, BorderLayout.WEST);
 
-        // ===== TABLA =====
         modeloTabla = new DefaultTableModel(
                 new String[]{"Cédula", "Nombre", "Teléfono", "Fecha Nac.", "Dirección"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -108,16 +101,13 @@ public class ClienteForm extends JPanel {
         panelTabla.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247)),
                 "Clientes registrados", 0, 0,
-                new Font("Arial", Font.BOLD, 13),
-                new Color(31, 56, 100)
-        ));
+                new Font("Arial", Font.BOLD, 13), new Color(31, 56, 100)));
         panelTabla.add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
-        // ===== ACCIONES =====
         btnGuardar.addActionListener(e -> guardarCliente());
         btnBuscar.addActionListener(e -> buscarCliente());
-        btnEliminar.addActionListener(e -> eliminarCliente());
+        btnDesactivar.addActionListener(e -> desactivarCliente());
         btnLimpiar.addActionListener(e -> limpiarCampos());
 
         tablaClientes.getSelectionModel().addListSelectionListener(e -> {
@@ -144,12 +134,9 @@ public class ClienteForm extends JPanel {
 
     private void cargarTabla() {
         modeloTabla.setRowCount(0);
-        clienteDAO.listarTodos().forEach(c -> modeloTabla.addRow(new Object[]{
-                c.getCedula(),
-                c.getNombre(),
-                c.getTelefono(),
-                c.getFechaNacimiento().toString(),
-                c.getDireccion()
+        clienteService.listarClientes().forEach(c -> modeloTabla.addRow(new Object[]{
+                c.getCedula(), c.getNombre(), c.getTelefono(),
+                c.getFechaNacimiento().toString(), c.getDireccion()
         }));
     }
 
@@ -160,18 +147,16 @@ public class ClienteForm extends JPanel {
         }
         try {
             Cliente cliente = new Cliente(
-                    txtCedula.getText(),
-                    txtNombre.getText(),
-                    txtTelefono.getText(),
-                    LocalDate.parse(txtFechaNacimiento.getText()),
-                    txtDireccion.getText()
-            );
-            clienteDAO.insertar(cliente);
+                    txtCedula.getText(), txtNombre.getText(), txtTelefono.getText(),
+                    LocalDate.parse(txtFechaNacimiento.getText()), txtDireccion.getText());
+            clienteService.registrarCliente(cliente);
             JOptionPane.showMessageDialog(this, "Cliente guardado correctamente.");
             limpiarCampos();
             cargarTabla();
         } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(this, "Formato de fecha inválido. Use YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -180,28 +165,38 @@ public class ClienteForm extends JPanel {
             JOptionPane.showMessageDialog(this, "Ingrese una cédula para buscar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        Cliente c = clienteDAO.buscarPorCedula(txtCedula.getText());
-        if (c != null) {
-            txtNombre.setText(c.getNombre());
-            txtTelefono.setText(c.getTelefono());
-            txtFechaNacimiento.setText(c.getFechaNacimiento().toString());
-            txtDireccion.setText(c.getDireccion());
-        } else {
-            JOptionPane.showMessageDialog(this, "Cliente no encontrado.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            Cliente c = clienteService.buscarPorCedula(txtCedula.getText());
+            if (c != null) {
+                txtNombre.setText(c.getNombre());
+                txtTelefono.setText(c.getTelefono());
+                txtFechaNacimiento.setText(c.getFechaNacimiento().toString());
+                txtDireccion.setText(c.getDireccion());
+            } else {
+                JOptionPane.showMessageDialog(this, "Cliente no encontrado.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void eliminarCliente() {
+    private void desactivarCliente() {
         if (txtCedula.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese una cédula para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ingrese una cédula para desactivar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        int confirmar = JOptionPane.showConfirmDialog(this, "¿Está seguro de eliminar este cliente?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int confirmar = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de desactivar este cliente?\nSu historial se conservará.",
+                "Confirmar", JOptionPane.YES_NO_OPTION);
         if (confirmar == JOptionPane.YES_OPTION) {
-            clienteDAO.eliminar(txtCedula.getText());
-            JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente.");
-            limpiarCampos();
-            cargarTabla();
+            try {
+                clienteService.desactivarCliente(txtCedula.getText());
+                JOptionPane.showMessageDialog(this, "Cliente desactivado correctamente.");
+                limpiarCampos();
+                cargarTabla();
+            } catch (RuntimeException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
