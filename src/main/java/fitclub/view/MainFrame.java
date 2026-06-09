@@ -146,6 +146,7 @@ public class MainFrame extends JFrame {
             case "Reportes"     -> contenedor.add(new ReportePanel(), BorderLayout.CENTER);
             case "Usuarios"     -> contenedor.add(new UsuarioAdminPanel(), BorderLayout.CENTER);
             case "Turnos"       -> contenedor.add(new TurnoForm(), BorderLayout.CENTER);
+            case "Maquinas" -> contenedor.add(new MaquinaForm(), BorderLayout.CENTER);
             default -> {
                 JLabel proximamente = new JLabel("Módulo en desarrollo...", SwingConstants.CENTER);
                 proximamente.setFont(new Font("Arial", Font.PLAIN, 15));
