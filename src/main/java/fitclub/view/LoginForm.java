@@ -2,7 +2,7 @@ package fitclub.view;
 
 import fitclub.dao.UsuarioDAO;
 import fitclub.model.Usuario;
-import fitclub.service.SeccionActual;
+import fitclub.service.SesionActual;
 import fitclub.service.UsuarioService;
 import javax.swing.*;
 import java.awt.*;
@@ -44,7 +44,6 @@ public class LoginForm extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = 2;
 
-        // Título
         JLabel titulo = new JLabel("🏋️  FIT CLUB", SwingConstants.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 22));
         titulo.setForeground(new Color(31, 56, 100));
@@ -60,28 +59,24 @@ public class LoginForm extends JFrame {
         gbc.gridy = 2;
         panel.add(Box.createVerticalStrut(10), gbc);
 
-        // Usuario
         gbc.gridwidth = 1; gbc.gridx = 0; gbc.gridy = 3;
         panel.add(new JLabel("Usuario:"), gbc);
         gbc.gridx = 1;
         txtUsername = new JTextField(15);
         panel.add(txtUsername, gbc);
 
-        // Contraseña
         gbc.gridx = 0; gbc.gridy = 4;
         panel.add(new JLabel("Contraseña:"), gbc);
         gbc.gridx = 1;
         txtPassword = new JPasswordField(15);
         panel.add(txtPassword, gbc);
 
-        // Error inline
         gbc.gridwidth = 2; gbc.gridx = 0; gbc.gridy = 5;
         lblError = new JLabel(" ", SwingConstants.CENTER);
         lblError.setForeground(new Color(180, 50, 50));
         lblError.setFont(new Font("Arial", Font.PLAIN, 12));
         panel.add(lblError, gbc);
 
-        // Botón ingresar
         gbc.gridy = 6;
         JButton btnIngresar = new JButton("Ingresar");
         btnIngresar.setBackground(new Color(46, 95, 163));
@@ -120,9 +115,9 @@ public class LoginForm extends JFrame {
                 txtPassword.setText("");
                 return;
             }
-            SeccionActual.getInstancia().iniciarSesion(usuario);
+            SesionActual.getInstancia().iniciarSesion(usuario);
             dispose();
-            new MainFrame();
+            SwingUtilities.invokeLater(MainFrame::new);
         } catch (RuntimeException ex) {
             lblError.setText("Error de conexión: " + ex.getMessage());
         }

@@ -59,10 +59,12 @@ public class Usuario {
 
     public String getPasswordHash() { return passwordHash; }
 
-    public void setPasswordHash(String passwordHash) {
-        if (passwordHash == null || passwordHash.length() != 64)
-            throw new IllegalArgumentException("El hash de contraseña debe tener 64 caracteres (SHA-256).");
-        this.passwordHash = passwordHash;
+    private String password;
+
+    public void setPassword(String password) {
+        if (password == null || password.length() < 6)
+            throw new IllegalArgumentException("La contraseña debe tener mínimo 6 caracteres.");
+        this.password = password;
     }
 
     public RolUsuario getRol() { return rol; }
