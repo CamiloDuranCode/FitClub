@@ -9,6 +9,12 @@ import java.util.List;
 /**
  * Implementación DAO para operaciones de Usuario.
  *
+ * CORRECCIONES:
+ *  - listarTodos() usaba v_usuarios_activos que no expone la columna "activo"
+ *    → ahora consulta la tabla usuario directamente con WHERE activo = TRUE
+ *  - insertar/cambiarPassword/toggleActivo usaban {call ...} con prepareCall()
+ *    → cambiado a CALL directo con prepareStatement() para PostgreSQL
+ *
  * @author Wilberto Ariza Zapata
  */
 public class UsuarioDAO implements IUsuarioDAO {
@@ -30,14 +36,15 @@ public class UsuarioDAO implements IUsuarioDAO {
 
     @Override
     public void insertar(Usuario usuario, String passwordHash) {
-        String sql = "{call sp_registrar_usuario(?, ?, ?, ?, ?)}";
-        try (CallableStatement cs = Conexion.getInstancia().prepareCall(sql)) {
-            cs.setString(1, usuario.getUsername());
-            cs.setString(2, passwordHash);
-            cs.setObject(3, usuario.getRol().toSQL(), Types.OTHER);
-            cs.setString(4, usuario.getNombre());
-            cs.setString(5, usuario.getCedulaEntrenador());
-            cs.execute();
+        // ✅ CALL directo — {call ...} falla con PROCEDURE en PostgreSQL
+        String sql = "CALL sp_registrar_usuario(?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, usuario.getUsername());
+            ps.setString(2, passwordHash);
+            ps.setObject(3, usuario.getRol().toSQL(), Types.OTHER);
+            ps.setString(4, usuario.getNombre());
+            ps.setString(5, usuario.getCedulaEntrenador());
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Error al registrar usuario: " + e.getMessage(), e);
         }
@@ -45,11 +52,12 @@ public class UsuarioDAO implements IUsuarioDAO {
 
     @Override
     public void cambiarPassword(int idUsuario, String passwordHash) {
-        String sql = "{call sp_cambiar_password(?, ?)}";
-        try (CallableStatement cs = Conexion.getInstancia().prepareCall(sql)) {
-            cs.setInt(1, idUsuario);
-            cs.setString(2, passwordHash);
-            cs.execute();
+        // ✅ CALL directo
+        String sql = "CALL sp_cambiar_password(?, ?)";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setString(2, passwordHash);
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Error al cambiar contraseña: " + e.getMessage(), e);
         }
@@ -57,10 +65,11 @@ public class UsuarioDAO implements IUsuarioDAO {
 
     @Override
     public void toggleActivo(int idUsuario) {
-        String sql = "{call sp_toggle_usuario(?)}";
-        try (CallableStatement cs = Conexion.getInstancia().prepareCall(sql)) {
-            cs.setInt(1, idUsuario);
-            cs.execute();
+        // ✅ CALL directo
+        String sql = "CALL sp_toggle_usuario(?)";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Error al cambiar estado del usuario: " + e.getMessage(), e);
         }
@@ -83,7 +92,8 @@ public class UsuarioDAO implements IUsuarioDAO {
     @Override
     public List<Usuario> listarTodos() {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT * FROM v_usuarios_activos";
+        // ✅ Consulta la tabla directamente — v_usuarios_activos no expone la columna "activo"
+        String sql = "SELECT * FROM usuario WHERE activo = TRUE ORDER BY id_usuario";
         try (Statement st = Conexion.getInstancia().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) lista.add(mapearSinHash(rs));
@@ -93,10 +103,6 @@ public class UsuarioDAO implements IUsuarioDAO {
         return lista;
     }
 
-    /**
-     * Mapea un ResultSet a Usuario sin incluir el hash de contraseña.
-     * Usado en consultas de lectura donde el hash no se retorna.
-     */
     private Usuario mapearSinHash(ResultSet rs) throws SQLException {
         return new Usuario(
                 rs.getInt("id_usuario"),
