@@ -2,6 +2,7 @@ package fitclub.view;
 
 import fitclub.dao.AsistenciaDAO;
 import fitclub.model.Asistencia;
+import fitclub.model.enums.TipoAsistencia;
 import fitclub.service.AsistenciaService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -122,13 +123,19 @@ public class AsistenciaForm extends JPanel {
         return btn;
     }
 
+    // REEMPLAZA el método registrarAsistencia() por este:
     private void registrarAsistencia() {
         if (txtClienteCedula.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "La cédula del cliente es obligatoria.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {
-            Asistencia asistencia = new Asistencia(0, LocalDateTime.now(), txtObservacion.getText());
+            Asistencia asistencia = new Asistencia(
+                    0,
+                    LocalDateTime.now(),
+                    fitclub.model.enums.TipoAsistencia.ENTRADA,   // ← tipo añadido
+                    txtObservacion.getText()
+            );
             asistenciaService.registrarAsistencia(asistencia, txtClienteCedula.getText());
             JOptionPane.showMessageDialog(this, "Asistencia registrada correctamente.");
             buscarPorCliente();
