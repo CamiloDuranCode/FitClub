@@ -9,17 +9,21 @@ import java.util.List;
  * Implementación DAO para operaciones de UsoMaquina.
  * Usa sp_iniciar_uso_maquina y sp_finalizar_uso_maquina.
  *
+ * CORRECCIÓN: PostgreSQL JDBC traduce {call ...} a SELECT internamente,
+ * lo que falla con PROCEDURE. Se usa CALL directo con prepareStatement.
+ *
  * @author Wilberto Ariza Zapata
  */
 public class UsoMaquinaDAO implements IUsoMaquinaDAO {
 
     @Override
     public void iniciarUso(String clienteCedula, int idMaquina) {
-        String sql = "{call sp_iniciar_uso_maquina(?, ?)}";
-        try (CallableStatement cs = Conexion.getInstancia().prepareCall(sql)) {
-            cs.setString(1, clienteCedula);
-            cs.setInt(2, idMaquina);
-            cs.execute();
+        // ✅ CALL directo — {call ...} se traduce a SELECT y falla con PROCEDURE
+        String sql = "CALL sp_iniciar_uso_maquina(?, ?)";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, clienteCedula);
+            ps.setInt(2, idMaquina);
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Error al iniciar uso de máquina: " + e.getMessage(), e);
         }
@@ -27,10 +31,11 @@ public class UsoMaquinaDAO implements IUsoMaquinaDAO {
 
     @Override
     public void finalizarUso(int idUso) {
-        String sql = "{call sp_finalizar_uso_maquina(?)}";
-        try (CallableStatement cs = Conexion.getInstancia().prepareCall(sql)) {
-            cs.setInt(1, idUso);
-            cs.execute();
+        // ✅ Mismo fix
+        String sql = "CALL sp_finalizar_uso_maquina(?)";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setInt(1, idUso);
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException("Error al finalizar uso de máquina: " + e.getMessage(), e);
         }
@@ -42,9 +47,7 @@ public class UsoMaquinaDAO implements IUsoMaquinaDAO {
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idUso);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapear(rs);
-                }
+                if (rs.next()) return mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al buscar uso: " + e.getMessage(), e);
