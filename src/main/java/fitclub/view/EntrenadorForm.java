@@ -7,18 +7,12 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-/**
- * Panel de gestión de entrenadores del gimnasio Fit Club.
- *
- * @author Wilberto Ariza Zapata
- */
 public class EntrenadorForm extends JPanel {
 
     private JTextField txtCedula;
     private JTextField txtNombre;
     private JTextField txtTelefono;
     private JTextField txtEspecialidad;
-    private JTextField txtHorario;
     private JTable tablaEntrenadores;
     private DefaultTableModel modeloTabla;
 
@@ -63,9 +57,6 @@ public class EntrenadorForm extends JPanel {
         gbc.gridx = 0; gbc.gridy = 3; panelCampos.add(new JLabel("Especialidad:"), gbc);
         gbc.gridx = 1; txtEspecialidad = new JTextField(15); panelCampos.add(txtEspecialidad, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; panelCampos.add(new JLabel("Horario:"), gbc);
-        gbc.gridx = 1; txtHorario = new JTextField(15); panelCampos.add(txtHorario, gbc);
-
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
         JButton btnGuardar    = crearBoton("Guardar",     new Color(46, 95, 163));
@@ -84,7 +75,7 @@ public class EntrenadorForm extends JPanel {
         add(panelSuperior, BorderLayout.WEST);
 
         modeloTabla = new DefaultTableModel(
-                new String[]{"Cédula", "Nombre", "Teléfono", "Especialidad", "Horario"}, 0) {
+                new String[]{"Cédula", "Nombre", "Teléfono", "Especialidad"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tablaEntrenadores = new JTable(modeloTabla);
@@ -115,7 +106,6 @@ public class EntrenadorForm extends JPanel {
                 txtNombre.setText((String) modeloTabla.getValueAt(fila, 1));
                 txtTelefono.setText((String) modeloTabla.getValueAt(fila, 2));
                 txtEspecialidad.setText((String) modeloTabla.getValueAt(fila, 3));
-                txtHorario.setText((String) modeloTabla.getValueAt(fila, 4));
             }
         });
     }
@@ -133,8 +123,7 @@ public class EntrenadorForm extends JPanel {
     private void cargarTabla() {
         modeloTabla.setRowCount(0);
         entrenadorService.listarEntrenadores().forEach(e -> modeloTabla.addRow(new Object[]{
-                e.getCedula(), e.getNombre(), e.getTelefono(),
-                e.getEspecialidad(), e.getHorario()
+                e.getCedula(), e.getNombre(), e.getTelefono(), e.getEspecialidad()
         }));
     }
 
@@ -145,8 +134,8 @@ public class EntrenadorForm extends JPanel {
         }
         try {
             Entrenador entrenador = new Entrenador(
-                    txtCedula.getText(), txtNombre.getText(), txtTelefono.getText(),
-                    txtEspecialidad.getText(), txtHorario.getText());
+                    txtCedula.getText(), txtNombre.getText(),
+                    txtTelefono.getText(), txtEspecialidad.getText());
             entrenadorService.registrarEntrenador(entrenador);
             JOptionPane.showMessageDialog(this, "Entrenador guardado correctamente.");
             limpiarCampos();
@@ -167,7 +156,6 @@ public class EntrenadorForm extends JPanel {
                 txtNombre.setText(e.getNombre());
                 txtTelefono.setText(e.getTelefono());
                 txtEspecialidad.setText(e.getEspecialidad());
-                txtHorario.setText(e.getHorario());
             } else {
                 JOptionPane.showMessageDialog(this, "Entrenador no encontrado.", "Info", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -201,6 +189,5 @@ public class EntrenadorForm extends JPanel {
         txtNombre.setText("");
         txtTelefono.setText("");
         txtEspecialidad.setText("");
-        txtHorario.setText("");
     }
 }
