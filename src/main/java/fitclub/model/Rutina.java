@@ -4,12 +4,16 @@ import java.time.LocalDate;
 
 /**
  * Representa una rutina de entrenamiento asignada a un cliente en el gimnasio Fit Club.
- * Incluye una descripción del plan de ejercicios y la fecha en que fue asignada.
+ * Contiene nombre, objetivo, descripción y fecha de creación.
+ *
+ * @author Juan Camilo Rangel Osias
  */
 
 public class Rutina {
 
     private int idRutina;
+    private String nombre;           // ← NUEVO
+    private String objetivo;
     private String descripcion;
     private LocalDate fechaAsignacion;
 
@@ -21,11 +25,15 @@ public class Rutina {
      * @param fechaAsignacion Fecha en que se asignó la rutina al cliente.
      */
 
-    public Rutina(int idRutina, String descripcion, LocalDate fechaAsignacion) {
+    public Rutina(int idRutina, String nombre, String objetivo,
+                  String descripcion, LocalDate fechaAsignacion) {
         this.idRutina = idRutina;
+        this.nombre = nombre;
+        this.objetivo = objetivo;
         this.descripcion = descripcion;
         this.fechaAsignacion = fechaAsignacion;
     }
+
 
     public int getIdRutina() {
         return idRutina;
@@ -35,6 +43,25 @@ public class Rutina {
 
         if (idRutina <= 0) throw new IllegalArgumentException("El ID de rutina debe ser mayor a cero");
         this.idRutina = idRutina;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de la rutina no puede estar vacío");
+        }
+        this.nombre = nombre;
+    }
+
+    public String getObjetivo() {
+        return objetivo;
+    }
+
+    public void setObjetivo(String objetivo) {
+        this.objetivo = objetivo;
     }
 
     public String getDescripcion() {
