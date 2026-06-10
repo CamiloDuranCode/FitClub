@@ -3,19 +3,15 @@ package fitclub.dao;
 import fitclub.model.Asistencia;
 import fitclub.model.enums.TipoAsistencia;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementación DAO para operaciones CRUD de Asistencia.
- *
- * @author Wilberto Ariza Zapata
- */
 public class AsistenciaDAO implements IAsistenciaDAO {
 
     @Override
     public void insertar(Asistencia asistencia, String clienteCedula) {
-        String sql = "INSERT INTO asistencia (cliente_cedula, fecha_hora, tipo, observacion) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO asistencia (cedula, fecha_hora, tipo, observacion) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
             ps.setTimestamp(2, Timestamp.valueOf(asistencia.getFechaHora()));
@@ -44,14 +40,7 @@ public class AsistenciaDAO implements IAsistenciaDAO {
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idAsistencia);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Asistencia(
-                            rs.getInt("id_asistencia"),
-                            rs.getTimestamp("fecha_hora").toLocalDateTime(),
-                            TipoAsistencia.valueOf(rs.getString("tipo").toUpperCase()),
-                            rs.getString("observacion")
-                    );
-                }
+                if (rs.next()) return mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al buscar asistencia: " + e.getMessage(), e);
@@ -62,22 +51,42 @@ public class AsistenciaDAO implements IAsistenciaDAO {
     @Override
     public List<Asistencia> listarPorCliente(String clienteCedula) {
         List<Asistencia> lista = new ArrayList<>();
-        String sql = "SELECT * FROM asistencia WHERE cliente_cedula = ?";
+        String sql = "SELECT * FROM asistencia WHERE cedula = ? ORDER BY fecha_hora DESC";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setString(1, clienteCedula);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(new Asistencia(
-                            rs.getInt("id_asistencia"),
-                            rs.getTimestamp("fecha_hora").toLocalDateTime(),
-                            TipoAsistencia.valueOf(rs.getString("tipo").toUpperCase()),
-                            rs.getString("observacion")
-                    ));
-                }
+                while (rs.next()) lista.add(mapear(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al listar asistencias: " + e.getMessage(), e);
         }
         return lista;
+    }
+
+    @Override
+    public List<Asistencia> listarPorFecha(String clienteCedula, LocalDate inicio, LocalDate fin) {
+        List<Asistencia> lista = new ArrayList<>();
+        String sql = "SELECT * FROM asistencia WHERE cedula = ? " +
+                "AND fecha_hora >= ? AND fecha_hora < ? ORDER BY fecha_hora DESC";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, clienteCedula);
+            ps.setTimestamp(2, Timestamp.valueOf(inicio.atStartOfDay()));
+            ps.setTimestamp(3, Timestamp.valueOf(fin.plusDays(1).atStartOfDay()));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapear(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al listar asistencias por fecha: " + e.getMessage(), e);
+        }
+        return lista;
+    }
+
+    private Asistencia mapear(ResultSet rs) throws SQLException {
+        return new Asistencia(
+                rs.getInt("id_asistencia"),
+                rs.getTimestamp("fecha_hora").toLocalDateTime(),
+                TipoAsistencia.valueOf(rs.getString("tipo").toUpperCase()),
+                rs.getString("observacion")
+        );
     }
 }
