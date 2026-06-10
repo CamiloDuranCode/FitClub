@@ -8,11 +8,10 @@ import java.time.LocalDate;
  *
  * @author Juan Camilo Rangel Osias
  */
-
 public class Rutina {
 
     private int idRutina;
-    private String nombre;           // ← NUEVO
+    private String nombre;
     private String objetivo;
     private String descripcion;
     private LocalDate fechaAsignacion;
@@ -21,10 +20,11 @@ public class Rutina {
      * Constructor de Rutina.
      *
      * @param idRutina        Identificador único de la rutina.
-     * @param descripcion     Descripción del plan de entrenamiento.
+     * @param nombre          Nombre de la rutina de entrenamiento.
+     * @param objetivo        Objetivo principal de la rutina (puede ser nulo).
+     * @param descripcion     Descripción detallada del plan de entrenamiento.
      * @param fechaAsignacion Fecha en que se asignó la rutina al cliente.
      */
-
     public Rutina(int idRutina, String nombre, String objetivo,
                   String descripcion, LocalDate fechaAsignacion) {
         this.idRutina = idRutina;
@@ -34,54 +34,38 @@ public class Rutina {
         this.fechaAsignacion = fechaAsignacion;
     }
 
-
-    public int getIdRutina() {
-        return idRutina;
-    }
+    public int getIdRutina() { return idRutina; }
 
     public void setIdRutina(int idRutina) {
-
-        if (idRutina <= 0) throw new IllegalArgumentException("El ID de rutina debe ser mayor a cero");
+        if (idRutina <= 0) throw new IllegalArgumentException("El ID de rutina debe ser mayor a cero.");
         this.idRutina = idRutina;
     }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() { return nombre; }
 
     public void setNombre(String nombre) {
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre de la rutina no puede estar vacío");
-        }
+        if (nombre == null || nombre.trim().isEmpty())
+            throw new IllegalArgumentException("El nombre de la rutina no puede estar vacío.");
         this.nombre = nombre;
     }
 
-    public String getObjetivo() {
-        return objetivo;
-    }
+    public String getObjetivo() { return objetivo; }
 
-    public void setObjetivo(String objetivo) {
-        this.objetivo = objetivo;
-    }
+    public void setObjetivo(String objetivo) { this.objetivo = objetivo; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+    public String getDescripcion() { return descripcion; }
 
     public void setDescripcion(String descripcion) {
-
         if (descripcion == null || descripcion.trim().isEmpty())
-            throw new IllegalArgumentException("La descripcion de la rutina no puede estar vacia");
+            throw new IllegalArgumentException("La descripción de la rutina no puede estar vacía.");
         this.descripcion = descripcion;
     }
 
-    public LocalDate getFechaAsignacion() {
-        return fechaAsignacion;
-    }
+    public LocalDate getFechaAsignacion() { return fechaAsignacion; }
 
     public void setFechaAsignacion(LocalDate fechaAsignacion) {
-
-        if (fechaAsignacion == null) throw new IllegalArgumentException("La fecha de asignacion no puede estar vacia");
+        if (fechaAsignacion == null)
+            throw new IllegalArgumentException("La fecha de asignación no puede estar vacía.");
         this.fechaAsignacion = fechaAsignacion;
     }
 }

@@ -1,12 +1,12 @@
 package fitclub.model.enums;
 
-/**
- * Tipos de registro de asistencia en el gimnasio Fit Club.
- * Refleja el ENUM tipo_asistencia definido en la base de datos PostgreSQL.
- */
-
 public enum TipoAsistencia {
+    ENTRADA, SALIDA;
 
-    ENTRADA,
-    SALIDA
+    @Override
+    public String toString() {
+        return name().charAt(0) + name().substring(1).toLowerCase();
+    }
+
+    public String toSQL() { return name().toLowerCase(); }
 }

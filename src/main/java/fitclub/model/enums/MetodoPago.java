@@ -1,14 +1,12 @@
 package fitclub.model.enums;
 
-/**
- * Métodos de pago aceptados en el gimnasio Fit Club.
- * Refleja el ENUM metodo_pago definido en la base de datos PostgreSQL.
- */
-
 public enum MetodoPago {
+    EFECTIVO, TARJETA, TRANSFERENCIA;
 
-    EFECTIVO,
-    TARJETA,
-    TRANSFERENCIA
+    @Override
+    public String toString() {
+        return name().charAt(0) + name().substring(1).toLowerCase();
+    }
 
+    public String toSQL() { return name().toLowerCase(); }
 }
