@@ -6,11 +6,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementación DAO para operaciones CRUD de Pago.
- *
- * @author Wilberto Ariza Zapata
- */
 public class PagoDAO implements IPagoDAO {
 
     @Override
@@ -98,9 +93,11 @@ public class PagoDAO implements IPagoDAO {
     private Pago mapear(ResultSet rs) throws SQLException {
         return new Pago(
                 rs.getInt("id_pago"),
+                rs.getString("cedula"),
                 rs.getDouble("monto"),
                 rs.getTimestamp("fecha_pago").toLocalDateTime().toLocalDate(),
-                MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
+                MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase()),
+                rs.getString("concepto")
         );
     }
 }
