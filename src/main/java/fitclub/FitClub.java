@@ -50,9 +50,10 @@ public class FitClub {
      * Registra un shutdown hook para cerrar la conexión a la BD
      * cuando la aplicación se cierre, sin importar cómo termine.
      */
-    private static void registrarCierreBD();
+    private static void registrarCierreBD() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-        Conexion.cerrarConexion();
-        System.out.println("Recursos liberados. Aplicación cerrada.");
-    }));
+            Conexion.cerrarConexion();
+            System.out.println("Recursos liberados. Aplicación cerrada.");
+        }));
+    }
 }

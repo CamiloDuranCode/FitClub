@@ -3,6 +3,7 @@ package fitclub.service;
 import fitclub.model.Maquina;
 import fitclub.model.UsoMaquina;
 import fitclub.model.enums.EstadoMaquina;
+import fitclub.dao.IUsoMaquinaDAO;
 
 import java.util.List;
 

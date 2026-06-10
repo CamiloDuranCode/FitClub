@@ -44,9 +44,6 @@ public class UsuarioAdminPanel extends JPanel {
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         add(titulo, BorderLayout.NORTH);
 
-        // -----------------------------------------------------------------
-        // Panel de campos
-        // -----------------------------------------------------------------
         JPanel panelCampos = new JPanel(new GridBagLayout());
         panelCampos.setBackground(Color.WHITE);
         panelCampos.setBorder(BorderFactory.createCompoundBorder(
@@ -83,14 +80,11 @@ public class UsuarioAdminPanel extends JPanel {
         txtCedulaEntrenador.setToolTipText("Solo requerido si el rol es ENTRENADOR");
         panelCampos.add(txtCedulaEntrenador, gbc);
 
-        // -----------------------------------------------------------------
-        // Botones
-        // -----------------------------------------------------------------
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
-        JButton btnRegistrar    = crearBoton("Registrar",   new Color(46, 95, 163));
-        JButton btnToggle       = crearBoton("Activar/Desactivar", new Color(180, 130, 30));
-        JButton btnLimpiar      = crearBoton("Limpiar",     new Color(100, 100, 100));
+        JButton btnRegistrar = crearBoton("Registrar",         new Color(46, 95, 163));
+        JButton btnToggle    = crearBoton("Activar/Desactivar", new Color(180, 130, 30));
+        JButton btnLimpiar   = crearBoton("Limpiar",            new Color(100, 100, 100));
         panelBotones.add(btnRegistrar);
         panelBotones.add(btnToggle);
         panelBotones.add(btnLimpiar);
@@ -101,9 +95,6 @@ public class UsuarioAdminPanel extends JPanel {
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
         add(panelSuperior, BorderLayout.WEST);
 
-        // -----------------------------------------------------------------
-        // Tabla
-        // -----------------------------------------------------------------
         modeloTabla = new DefaultTableModel(
                 new String[]{"ID", "Username", "Nombre", "Rol", "Cédula Entrenador"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -119,14 +110,11 @@ public class UsuarioAdminPanel extends JPanel {
         panelTabla.setBackground(Color.WHITE);
         panelTabla.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(214, 228, 247)),
-                "Usuarios activos", 0, 0,
+                "Usuarios registrados", 0, 0,
                 new Font("Arial", Font.BOLD, 13), new Color(31, 56, 100)));
         panelTabla.add(new JScrollPane(tablaUsuarios), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
-        // -----------------------------------------------------------------
-        // Listeners
-        // -----------------------------------------------------------------
         btnRegistrar.addActionListener(e -> registrarUsuario());
         btnToggle.addActionListener(e -> toggleUsuario());
         btnLimpiar.addActionListener(e -> limpiarCampos());
@@ -136,16 +124,13 @@ public class UsuarioAdminPanel extends JPanel {
             if (fila >= 0) {
                 txtUsername.setText((String) modeloTabla.getValueAt(fila, 1));
                 txtNombre.setText((String) modeloTabla.getValueAt(fila, 2));
-                cmbRol.setSelectedItem(RolUsuario.valueOf(modeloTabla.getValueAt(fila, 3).toString().toUpperCase()));
+                cmbRol.setSelectedItem(RolUsuario.valueOf(
+                        modeloTabla.getValueAt(fila, 3).toString().toUpperCase()));
                 String cedula = (String) modeloTabla.getValueAt(fila, 4);
                 txtCedulaEntrenador.setText(cedula != null ? cedula : "");
             }
         });
     }
-
-    // -------------------------------------------------------------------------
-    // Acciones
-    // -------------------------------------------------------------------------
 
     private void registrarUsuario() {
         String username = txtUsername.getText().trim();
@@ -165,9 +150,9 @@ public class UsuarioAdminPanel extends JPanel {
             return;
         }
         try {
-            Usuario nuevo = new Usuario(0, username, password, rol, nombre, true,
+            Usuario nuevo = new Usuario(0, username, null, rol, nombre, true,
                     cedula.isEmpty() ? null : cedula);
-            usuarioService.registrarUsuario(nuevo, password);
+            usuarioService.registrar(nuevo, password);
             JOptionPane.showMessageDialog(this, "Usuario registrado correctamente.");
             cargarTabla();
             limpiarCampos();
@@ -197,7 +182,7 @@ public class UsuarioAdminPanel extends JPanel {
     private void cargarTabla() {
         modeloTabla.setRowCount(0);
         try {
-            List<Usuario> usuarios = usuarioService.listarTodos();
+            List<Usuario> usuarios = usuarioService.listarUsuarios();
             for (Usuario u : usuarios) {
                 modeloTabla.addRow(new Object[]{
                         u.getIdUsuario(),

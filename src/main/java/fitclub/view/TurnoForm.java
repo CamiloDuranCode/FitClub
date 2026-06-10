@@ -4,7 +4,6 @@ import fitclub.dao.TurnoDAO;
 import fitclub.model.Turno;
 import fitclub.model.enums.DiaSemana;
 import fitclub.service.TurnoService;
-import fitclub.service.SeccionActual;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -45,9 +44,6 @@ public class TurnoForm extends JPanel {
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         add(titulo, BorderLayout.NORTH);
 
-        // -----------------------------------------------------------------
-        // Panel de campos
-        // -----------------------------------------------------------------
         JPanel panelCampos = new JPanel(new GridBagLayout());
         panelCampos.setBackground(Color.WHITE);
         panelCampos.setBorder(BorderFactory.createCompoundBorder(
@@ -78,9 +74,6 @@ public class TurnoForm extends JPanel {
         gbc.gridx = 1; txtHoraFin = new JTextField(10);
         panelCampos.add(txtHoraFin, gbc);
 
-        // -----------------------------------------------------------------
-        // Botones
-        // -----------------------------------------------------------------
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
         JButton btnGuardar    = crearBoton("Guardar",    new Color(46, 95, 163));
@@ -100,9 +93,6 @@ public class TurnoForm extends JPanel {
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
         add(panelSuperior, BorderLayout.WEST);
 
-        // -----------------------------------------------------------------
-        // Tabla
-        // -----------------------------------------------------------------
         modeloTabla = new DefaultTableModel(
                 new String[]{"ID", "Cédula Entrenador", "Día", "Hora Inicio", "Hora Fin"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -123,9 +113,6 @@ public class TurnoForm extends JPanel {
         panelTabla.add(new JScrollPane(tablaTurnos), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
-        // -----------------------------------------------------------------
-        // Listeners
-        // -----------------------------------------------------------------
         btnGuardar.addActionListener(e -> guardarTurno());
         btnActualizar.addActionListener(e -> actualizarTurno());
         btnEliminar.addActionListener(e -> eliminarTurno());
@@ -137,21 +124,18 @@ public class TurnoForm extends JPanel {
             if (fila >= 0) {
                 idSeleccionado = (int) modeloTabla.getValueAt(fila, 0);
                 txtCedulaEntrenador.setText((String) modeloTabla.getValueAt(fila, 1));
-                cmbDia.setSelectedItem(DiaSemana.valueOf(modeloTabla.getValueAt(fila, 2).toString().toUpperCase()));
+                cmbDia.setSelectedItem(DiaSemana.valueOf(
+                        modeloTabla.getValueAt(fila, 2).toString().toUpperCase()));
                 txtHoraInicio.setText((String) modeloTabla.getValueAt(fila, 3));
                 txtHoraFin.setText((String) modeloTabla.getValueAt(fila, 4));
             }
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Acciones
-    // -------------------------------------------------------------------------
-
     private void guardarTurno() {
         try {
             Turno turno = construirTurno(0);
-            turnoService.registrarTurno(turno);
+            turnoService.asignarTurno(turno);
             JOptionPane.showMessageDialog(this, "Turno registrado correctamente.");
             cargarTablaInicial();
             limpiarCampos();
@@ -234,7 +218,8 @@ public class TurnoForm extends JPanel {
 
     private Turno construirTurno(int id) {
         String cedula = txtCedulaEntrenador.getText().trim();
-        if (cedula.isEmpty()) throw new IllegalArgumentException("La cédula del entrenador es obligatoria.");
+        if (cedula.isEmpty())
+            throw new IllegalArgumentException("La cédula del entrenador es obligatoria.");
         try {
             LocalTime inicio = LocalTime.parse(txtHoraInicio.getText().trim());
             LocalTime fin    = LocalTime.parse(txtHoraFin.getText().trim());

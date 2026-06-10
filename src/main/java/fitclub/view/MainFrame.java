@@ -1,7 +1,7 @@
 package fitclub.view;
 
 import fitclub.model.enums.RolUsuario;
-import fitclub.service.SeccionActual;
+import fitclub.service.SesionActual;
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,6 +9,7 @@ import java.awt.*;
  * Ventana principal del Sistema de Gestión Fit Club.
  * Contiene un menú lateral (sidebar) desde el cual se navega
  * entre los diferentes módulos del sistema.
+ * El sidebar se filtra según el rol del usuario autenticado.
  *
  * @author Camilo Andrés Durán Baquero
  */
@@ -52,7 +53,7 @@ public class MainFrame extends JFrame {
         menuLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         sidebar.add(menuLabel);
 
-        RolUsuario rol = SeccionActual.getInstancia().getRolActual();
+        RolUsuario rol = SesionActual.getInstancia().getRolActual();
 
         // admin y recepcionista ven todo
         if (rol == RolUsuario.ADMIN || rol == RolUsuario.RECEPCIONISTA) {
@@ -65,6 +66,8 @@ public class MainFrame extends JFrame {
             sidebar.add(crearBotonMenu("📋  Asistencia", "Asistencia"));
             sidebar.add(Box.createVerticalStrut(8));
             sidebar.add(crearBotonMenu("🏃  Rutinas", "Rutinas"));
+            sidebar.add(Box.createVerticalStrut(8));
+            sidebar.add(crearBotonMenu("🏋️  Máquinas", "Maquinas"));
             sidebar.add(Box.createVerticalStrut(8));
             sidebar.add(crearBotonMenu("📊  Reportes", "Reportes"));
         }
@@ -97,7 +100,8 @@ public class MainFrame extends JFrame {
 
         JPanel bienvenida = new JPanel(new GridBagLayout());
         bienvenida.setBackground(new Color(242, 245, 250));
-        JLabel lblBienvenida = new JLabel("Selecciona un módulo del menú lateral");
+        JLabel lblBienvenida = new JLabel("Bienvenido, " +
+                SesionActual.getInstancia().getUsuarioActual().getNombre());
         lblBienvenida.setFont(new Font("Arial", Font.PLAIN, 16));
         lblBienvenida.setForeground(new Color(100, 100, 100));
         bienvenida.add(lblBienvenida);
@@ -138,15 +142,15 @@ public class MainFrame extends JFrame {
     private void cargarModulo(String modulo) {
         contenedor.removeAll();
         switch (modulo) {
-            case "Clientes"     -> contenedor.add(new ClienteForm(), BorderLayout.CENTER);
-            case "Entrenadores" -> contenedor.add(new EntrenadorForm(), BorderLayout.CENTER);
-            case "Membresias"   -> contenedor.add(new MembresiaForm(), BorderLayout.CENTER);
-            case "Asistencia"   -> contenedor.add(new AsistenciaForm(), BorderLayout.CENTER);
-            case "Rutinas"      -> contenedor.add(new RutinaForm(), BorderLayout.CENTER);
-            case "Reportes"     -> contenedor.add(new ReportePanel(), BorderLayout.CENTER);
-            case "Usuarios"     -> contenedor.add(new UsuarioAdminPanel(), BorderLayout.CENTER);
-            case "Turnos"       -> contenedor.add(new TurnoForm(), BorderLayout.CENTER);
-            case "Maquinas" -> contenedor.add(new MaquinaForm(), BorderLayout.CENTER);
+            case "Clientes"     -> contenedor.add(new ClienteForm(),        BorderLayout.CENTER);
+            case "Entrenadores" -> contenedor.add(new EntrenadorForm(),     BorderLayout.CENTER);
+            case "Membresias"   -> contenedor.add(new MembresiaForm(),      BorderLayout.CENTER);
+            case "Asistencia"   -> contenedor.add(new AsistenciaForm(),     BorderLayout.CENTER);
+            case "Rutinas"      -> contenedor.add(new RutinaForm(),         BorderLayout.CENTER);
+            case "Reportes"     -> contenedor.add(new ReportePanel(),       BorderLayout.CENTER);
+            case "Usuarios"     -> contenedor.add(new UsuarioAdminPanel(),  BorderLayout.CENTER);
+            case "Turnos"       -> contenedor.add(new TurnoForm(),          BorderLayout.CENTER);
+            case "Maquinas"     -> contenedor.add(new MaquinaForm(),        BorderLayout.CENTER);
             default -> {
                 JLabel proximamente = new JLabel("Módulo en desarrollo...", SwingConstants.CENTER);
                 proximamente.setFont(new Font("Arial", Font.PLAIN, 15));
