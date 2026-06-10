@@ -146,18 +146,29 @@ public class MembresiaForm extends JPanel {
             return;
         }
         try {
-            String tipo = (String) cmbTipo.getSelectedItem();
+            String tipoStr = (String) cmbTipo.getSelectedItem();
+            fitclub.model.enums.TipoMembresia tipo =
+                    fitclub.model.enums.TipoMembresia.valueOf(tipoStr.toUpperCase());
+
             LocalDate fechaInicio = LocalDate.now();
-            LocalDate fechaVencimiento = calcularFechaVencimiento(tipo, fechaInicio);
+            LocalDate fechaVencimiento = calcularFechaVencimiento(tipoStr, fechaInicio);
 
             Membresia membresia = new Membresia(0, tipo, fechaInicio, fechaVencimiento);
-            membresiaService.registrarMembresia(membresia, txtClienteCedula.getText());
+            String cedula = txtClienteCedula.getText().trim();
+            membresiaService.registrarMembresia(membresia, cedula);
 
-            // Registrar pago automáticamente usando el service
-            List<Membresia> membresias = membresiaService.listarMembresiasCliente(txtClienteCedula.getText());
+            // Registrar pago automático
+            List<Membresia> membresias = membresiaService.listarMembresiasCliente(cedula);
             if (!membresias.isEmpty()) {
                 Membresia ultima = membresias.get(membresias.size() - 1);
-                Pago pago = new Pago(0, ultima.calcularTotal(), LocalDate.now(), "efectivo");
+                Pago pago = new Pago(
+                        0,
+                        cedula,                                         // ← cedula añadida
+                        ultima.calcularTotal(),
+                        LocalDate.now(),
+                        fitclub.model.enums.MetodoPago.EFECTIVO,        // ← enum correcto
+                        "Membresía " + tipoStr                          // ← concepto
+                );
                 pagoService.registrarPago(pago, ultima.getIdMembresia());
             }
 
