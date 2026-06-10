@@ -58,4 +58,12 @@ public class EntrenadorService {
             throw new IllegalArgumentException("No existe un entrenador con la cédula: " + cedula);
         entrenadorDAO.desactivar(cedula);
     }
+
+    public void eliminarEntrenador(String cedula) {
+        if (cedula == null || cedula.trim().isEmpty())
+            throw new IllegalArgumentException("La cédula no puede estar vacía.");
+        if (entrenadorDAO.buscarPorCedula(cedula) == null)
+            throw new IllegalArgumentException("No existe un entrenador con la cédula: " + cedula);
+        entrenadorDAO.eliminar(cedula);
+    }
 }

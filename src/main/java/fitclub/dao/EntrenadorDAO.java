@@ -5,11 +5,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementación DAO para operaciones CRUD de Entrenador.
- *
- * @author Wilberto Ariza Zapata
- */
 public class EntrenadorDAO implements IEntrenadorDAO {
 
     @Override
@@ -78,6 +73,33 @@ public class EntrenadorDAO implements IEntrenadorDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al desactivar entrenador: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void eliminar(String cedula) {
+        // Elimina en orden inverso por las FK: primero entrenador, luego persona
+        String sqlEntrenador = "DELETE FROM entrenador WHERE cedula = ?";
+        String sqlPersona    = "DELETE FROM persona    WHERE cedula = ?";
+        Connection con = Conexion.getInstancia();
+        try {
+            con.setAutoCommit(false);
+            try (PreparedStatement psEntrenador = con.prepareStatement(sqlEntrenador);
+                 PreparedStatement psPersona    = con.prepareStatement(sqlPersona)) {
+
+                psEntrenador.setString(1, cedula);
+                psEntrenador.executeUpdate();
+
+                psPersona.setString(1, cedula);
+                psPersona.executeUpdate();
+
+                con.commit();
+            }
+        } catch (SQLException e) {
+            try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            throw new RuntimeException("Error al eliminar entrenador: " + e.getMessage(), e);
+        } finally {
+            try { con.setAutoCommit(true); } catch (SQLException e) { e.printStackTrace(); }
         }
     }
 

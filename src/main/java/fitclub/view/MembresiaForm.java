@@ -5,6 +5,8 @@ import fitclub.dao.PagoDAO;
 import fitclub.model.Membresia;
 import fitclub.model.Pago;
 import fitclub.service.MembresiaService;
+import fitclub.model.enums.MetodoPago;
+import fitclub.model.enums.TipoMembresia;
 import fitclub.service.PagoService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
