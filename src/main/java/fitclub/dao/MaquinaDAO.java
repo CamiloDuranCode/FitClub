@@ -109,4 +109,4 @@ public class MaquinaDAO implements IMaquinaDAO {
                 rs.getBoolean("activa")
         );
     }
-} 
+}
