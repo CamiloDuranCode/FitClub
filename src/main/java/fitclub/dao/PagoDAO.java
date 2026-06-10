@@ -15,12 +15,12 @@ public class PagoDAO implements IPagoDAO {
 
     @Override
     public void insertar(Pago pago, int membresiaId) {
-        String sql = "INSERT INTO pago (membresia_id, monto, fecha_pago, metodo_pago) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO pago (cedula, monto, metodo_pago, concepto) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
-            ps.setInt(1, membresiaId);
+            ps.setString(1, pago.getCedula());
             ps.setDouble(2, pago.getMonto());
-            ps.setDate(3, Date.valueOf(pago.getFechaPago()));
-            ps.setObject(4, pago.getMetodoPago().name().toLowerCase(), Types.OTHER);
+            ps.setObject(3, pago.getMetodoPago().toSQL(), Types.OTHER);
+            ps.setString(4, pago.getConcepto());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al insertar pago: " + e.getMessage(), e);
@@ -29,11 +29,11 @@ public class PagoDAO implements IPagoDAO {
 
     @Override
     public void actualizar(Pago pago) {
-        String sql = "UPDATE pago SET monto = ?, fecha_pago = ?, metodo_pago = ? WHERE id_pago = ?";
+        String sql = "UPDATE pago SET monto = ?, metodo_pago = ?, concepto = ? WHERE id_pago = ?";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setDouble(1, pago.getMonto());
-            ps.setDate(2, Date.valueOf(pago.getFechaPago()));
-            ps.setObject(3, pago.getMetodoPago().name().toLowerCase(), Types.OTHER);
+            ps.setObject(2, pago.getMetodoPago().toSQL(), Types.OTHER);
+            ps.setString(3, pago.getConcepto());
             ps.setInt(4, pago.getIdPago());
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -58,14 +58,7 @@ public class PagoDAO implements IPagoDAO {
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, idPago);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Pago(
-                            rs.getInt("id_pago"),
-                            rs.getDouble("monto"),
-                            rs.getDate("fecha_pago").toLocalDate(),
-                            MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
-                    );
-                }
+                if (rs.next()) return mapear(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al buscar pago: " + e.getMessage(), e);
@@ -76,21 +69,15 @@ public class PagoDAO implements IPagoDAO {
     @Override
     public List<Pago> listarPorMembresia(int membresiaId) {
         List<Pago> lista = new ArrayList<>();
-        String sql = "SELECT * FROM pago WHERE membresia_id = ?";
+        String sql = "SELECT * FROM pago WHERE cedula = " +
+                "(SELECT cedula FROM cliente_membresia WHERE id = ?)";
         try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
             ps.setInt(1, membresiaId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(new Pago(
-                            rs.getInt("id_pago"),
-                            rs.getDouble("monto"),
-                            rs.getDate("fecha_pago").toLocalDate(),
-                            MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
-                    ));
-                }
+                while (rs.next()) lista.add(mapear(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error al listar pagos por membresía: " + e.getMessage(), e);
+            throw new RuntimeException("Error al listar pagos: " + e.getMessage(), e);
         }
         return lista;
     }
@@ -98,20 +85,22 @@ public class PagoDAO implements IPagoDAO {
     @Override
     public List<Pago> listarTodos() {
         List<Pago> lista = new ArrayList<>();
-        String sql = "SELECT * FROM pago";
+        String sql = "SELECT * FROM pago ORDER BY fecha_pago DESC";
         try (Statement st = Conexion.getInstancia().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                lista.add(new Pago(
-                        rs.getInt("id_pago"),
-                        rs.getDouble("monto"),
-                        rs.getDate("fecha_pago").toLocalDate(),
-                        MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
-                ));
-            }
+            while (rs.next()) lista.add(mapear(rs));
         } catch (SQLException e) {
-            throw new RuntimeException("Error al listar todos los pagos: " + e.getMessage(), e);
+            throw new RuntimeException("Error al listar pagos: " + e.getMessage(), e);
         }
         return lista;
+    }
+
+    private Pago mapear(ResultSet rs) throws SQLException {
+        return new Pago(
+                rs.getInt("id_pago"),
+                rs.getDouble("monto"),
+                rs.getTimestamp("fecha_pago").toLocalDateTime().toLocalDate(),
+                MetodoPago.valueOf(rs.getString("metodo_pago").toUpperCase())
+        );
     }
 }

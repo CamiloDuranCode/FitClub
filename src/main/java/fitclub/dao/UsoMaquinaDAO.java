@@ -100,8 +100,8 @@ public class UsoMaquinaDAO implements IUsoMaquinaDAO {
         return new UsoMaquina(
                 rs.getInt("id_uso"),
                 rs.getInt("id_maquina"),
-                rs.getString("cedula"),
                 rs.getTimestamp("fecha_hora_inicio").toLocalDateTime(),
+                rs.getString("cedula"),
                 fin != null ? fin.toLocalDateTime() : null
         );
     }

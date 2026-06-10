@@ -1,6 +1,7 @@
 package fitclub.dao;
 
 import fitclub.model.Asistencia;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IAsistenciaDAO {
@@ -8,4 +9,5 @@ public interface IAsistenciaDAO {
     void eliminar(int idAsistencia);
     Asistencia buscarPorId(int idAsistencia);
     List<Asistencia> listarPorCliente(String clienteCedula);
+    List<Asistencia> listarPorFecha(String clienteCedula, LocalDate inicio, LocalDate fin);
 }
