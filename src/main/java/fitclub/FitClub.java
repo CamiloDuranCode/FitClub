@@ -1,15 +1,16 @@
 package fitclub;
 
 import fitclub.dao.Conexion;
-import fitclub.view.MainFrame;
+import fitclub.view.LoginForm;
 
 import javax.swing.*;
 import java.sql.Connection;
 
 /**
  * Punto de entrada principal del Sistema de Gestión Fit Club.
- * Verifica la conexión a la base de datos antes de iniciar la interfaz gráfica
- * y registra un hook de cierre para liberar recursos al terminar la aplicación.
+ * Verifica la conexión a la base de datos antes de iniciar la interfaz gráfica,
+ * muestra el formulario de autenticación y registra un hook de cierre
+ * para liberar recursos al terminar la aplicación.
  *
  * @author Equipo Fit Club
  */
@@ -27,7 +28,7 @@ public class FitClub {
         }
 
         registrarCierreBD();
-        SwingUtilities.invokeLater(MainFrame::new);
+        SwingUtilities.invokeLater(LoginForm::new);
     }
 
     /**
@@ -49,10 +50,9 @@ public class FitClub {
      * Registra un shutdown hook para cerrar la conexión a la BD
      * cuando la aplicación se cierre, sin importar cómo termine.
      */
-    private static void registrarCierreBD() {
+    private static void registrarCierreBD();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Conexion.cerrarConexion();
-            System.out.println("Recursos liberados. Aplicación cerrada.");
-        }));
-    }
+        Conexion.cerrarConexion();
+        System.out.println("Recursos liberados. Aplicación cerrada.");
+    }));
 }
