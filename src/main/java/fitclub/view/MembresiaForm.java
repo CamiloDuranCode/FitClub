@@ -1,21 +1,32 @@
 package fitclub.view;
 
+import fitclub.dao.Conexion;
 import fitclub.dao.MembresiaDAO;
 import fitclub.dao.PagoDAO;
 import fitclub.model.Membresia;
 import fitclub.model.Pago;
 import fitclub.service.MembresiaService;
-import fitclub.model.enums.MetodoPago;
-import fitclub.model.enums.TipoMembresia;
 import fitclub.service.PagoService;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Panel de gestión de membresías del gimnasio Fit Club.
+ *
+ * CORRECCIONES APLICADAS:
+ *  - guardarMembresia() ya NO crea Membresia(0, ...).
+ *    Ahora consulta la tabla «membresia» y obtiene el id_membresia real
+ *    antes de hacer el INSERT en cliente_membresia.
+ *  - Se agrega obtenerIdMembresiaCatalogo() para la consulta al catálogo.
+ *  - El combo cmbTipo sigue mostrando strings pero el ID se resuelve internamente.
  *
  * @author Wilberto Ariza Zapata
  */
@@ -32,10 +43,35 @@ public class MembresiaForm extends JPanel {
 
     public MembresiaForm() {
         this.membresiaService = new MembresiaService(new MembresiaDAO());
-        this.pagoService = new PagoService(new PagoDAO());
+        this.pagoService      = new PagoService(new PagoDAO());
         initComponents();
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CORRECCIÓN PRINCIPAL
+    // Consulta la tabla «membresia» y devuelve el id_membresia que corresponde
+    // al tipo seleccionado. Lanza RuntimeException si no existe en el catálogo.
+    // ─────────────────────────────────────────────────────────────────────────
+    private int obtenerIdMembresiaCatalogo(String tipo) {
+        String sql = "SELECT id_membresia FROM membresia WHERE tipo = ?::tipo_membresia AND activa = TRUE LIMIT 1";
+        try (PreparedStatement ps = Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, tipo.toLowerCase());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id_membresia");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al consultar catálogo de membresías: " + e.getMessage(), e);
+        }
+        throw new RuntimeException(
+                "No existe una membresía activa de tipo «" + tipo + "» en el catálogo.\n" +
+                        "Verifique que la tabla «membresia» tenga registros activos.");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // UI
+    // ─────────────────────────────────────────────────────────────────────────
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
         setBackground(new Color(242, 245, 250));
@@ -69,15 +105,16 @@ public class MembresiaForm extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 2;
         panelCampos.add(new JLabel("Tipo:"), gbc);
-        gbc.gridx = 1; cmbTipo = new JComboBox<>(new String[]{"mensual", "trimestral", "semestral", "anual"});
+        gbc.gridx = 1;
+        cmbTipo = new JComboBox<>(new String[]{"mensual", "trimestral", "semestral", "anual"});
         panelCampos.add(cmbTipo, gbc);
 
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setBackground(Color.WHITE);
-        JButton btnGuardar  = crearBoton("Guardar",   new Color(46, 95, 163));
-        JButton btnBuscar   = crearBoton("Buscar",    new Color(46, 95, 163));
-        JButton btnCancelar = crearBoton("Cancelar",  new Color(180, 50, 50));
-        JButton btnLimpiar  = crearBoton("Limpiar",   new Color(100, 100, 100));
+        JButton btnGuardar  = crearBoton("Guardar",  new Color(46, 95, 163));
+        JButton btnBuscar   = crearBoton("Buscar",   new Color(46, 95, 163));
+        JButton btnCancelar = crearBoton("Cancelar", new Color(180, 50, 50));
+        JButton btnLimpiar  = crearBoton("Limpiar",  new Color(100, 100, 100));
         panelBotones.add(btnGuardar);
         panelBotones.add(btnBuscar);
         panelBotones.add(btnCancelar);
@@ -85,7 +122,7 @@ public class MembresiaForm extends JPanel {
 
         JPanel panelSuperior = new JPanel(new BorderLayout());
         panelSuperior.setBackground(new Color(242, 245, 250));
-        panelSuperior.add(panelCampos, BorderLayout.CENTER);
+        panelSuperior.add(panelCampos,  BorderLayout.CENTER);
         panelSuperior.add(panelBotones, BorderLayout.SOUTH);
         add(panelSuperior, BorderLayout.WEST);
 
@@ -109,16 +146,16 @@ public class MembresiaForm extends JPanel {
         panelTabla.add(new JScrollPane(tablaMembresias), BorderLayout.CENTER);
         add(panelTabla, BorderLayout.CENTER);
 
-        btnGuardar.addActionListener(e -> guardarMembresia());
-        btnBuscar.addActionListener(e -> buscarMembresia());
+        btnGuardar.addActionListener(e  -> guardarMembresia());
+        btnBuscar.addActionListener(e   -> buscarMembresia());
         btnCancelar.addActionListener(e -> cancelarMembresia());
-        btnLimpiar.addActionListener(e -> limpiarCampos());
+        btnLimpiar.addActionListener(e  -> limpiarCampos());
 
         tablaMembresias.getSelectionModel().addListSelectionListener(e -> {
             int fila = tablaMembresias.getSelectedRow();
             if (fila >= 0) {
                 txtIdMembresia.setText(String.valueOf(modeloTabla.getValueAt(fila, 0)));
-                cmbTipo.setSelectedItem(modeloTabla.getValueAt(fila, 1));
+                cmbTipo.setSelectedItem(modeloTabla.getValueAt(fila, 1).toString().toLowerCase());
             }
         });
     }
@@ -142,9 +179,13 @@ public class MembresiaForm extends JPanel {
         };
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // GUARDAR — BUG CORREGIDO
+    // ─────────────────────────────────────────────────────────────────────────
     private void guardarMembresia() {
-        if (txtClienteCedula.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "La cédula del cliente es obligatoria.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (txtClienteCedula.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "La cédula del cliente es obligatoria.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {
@@ -152,10 +193,15 @@ public class MembresiaForm extends JPanel {
             fitclub.model.enums.TipoMembresia tipo =
                     fitclub.model.enums.TipoMembresia.valueOf(tipoStr.toUpperCase());
 
-            LocalDate fechaInicio = LocalDate.now();
+            // ✅ CORRECCIÓN: obtener el id_membresia real del catálogo
+            int idMembresiaCatalogo = obtenerIdMembresiaCatalogo(tipoStr);
+
+            LocalDate fechaInicio      = LocalDate.now();
             LocalDate fechaVencimiento = calcularFechaVencimiento(tipoStr, fechaInicio);
 
-            Membresia membresia = new Membresia(0, tipo, fechaInicio, fechaVencimiento);
+            // ✅ Antes era new Membresia(0, ...) → ahora usa el ID real
+            Membresia membresia = new Membresia(idMembresiaCatalogo, tipo, fechaInicio, fechaVencimiento);
+
             String cedula = txtClienteCedula.getText().trim();
             membresiaService.registrarMembresia(membresia, cedula);
 
@@ -165,11 +211,11 @@ public class MembresiaForm extends JPanel {
                 Membresia ultima = membresias.get(membresias.size() - 1);
                 Pago pago = new Pago(
                         0,
-                        cedula,                                         // ← cedula añadida
+                        cedula,
                         ultima.calcularTotal(),
                         LocalDate.now(),
-                        fitclub.model.enums.MetodoPago.EFECTIVO,        // ← enum correcto
-                        "Membresía " + tipoStr                          // ← concepto
+                        fitclub.model.enums.MetodoPago.EFECTIVO,
+                        "Membresía " + tipoStr
                 );
                 pagoService.registrarPago(pago, ultima.getIdMembresia());
             }
@@ -178,22 +224,25 @@ public class MembresiaForm extends JPanel {
                     "Membresía guardada.\nInicio: " + fechaInicio + "\nVencimiento: " + fechaVencimiento);
             cargarTabla();
             limpiarCampos();
+
         } catch (RuntimeException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void buscarMembresia() {
-        if (txtClienteCedula.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese la cédula del cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (txtClienteCedula.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Ingrese la cédula del cliente.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         cargarTabla();
     }
 
     private void cancelarMembresia() {
-        if (txtIdMembresia.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese un ID para cancelar.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (txtIdMembresia.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Ingrese un ID para cancelar.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {
@@ -201,7 +250,7 @@ public class MembresiaForm extends JPanel {
                     "¿Está seguro de cancelar esta membresía?\nEl historial de pagos se conservará.",
                     "Confirmar", JOptionPane.YES_NO_OPTION);
             if (confirmar == JOptionPane.YES_OPTION) {
-                membresiaService.cancelarMembresia(Integer.parseInt(txtIdMembresia.getText()));
+                membresiaService.cancelarMembresia(Integer.parseInt(txtIdMembresia.getText().trim()));
                 JOptionPane.showMessageDialog(this, "Membresía cancelada correctamente.");
                 cargarTabla();
                 limpiarCampos();
@@ -215,14 +264,42 @@ public class MembresiaForm extends JPanel {
 
     private void cargarTabla() {
         modeloTabla.setRowCount(0);
-        if (txtClienteCedula.getText().isEmpty()) return;
-        membresiaService.listarMembresiasCliente(txtClienteCedula.getText()).forEach(m ->
-                modeloTabla.addRow(new Object[]{
-                        m.getIdMembresia(), m.getTipo(),
-                        m.getFechaInicio().toString(),
-                        m.getFechaVencimiento().toString(),
-                        m.estaVigente() ? "✅ Vigente" : "❌ Vencida"
-                }));
+        String cedula = txtClienteCedula.getText().trim();
+        if (cedula.isEmpty()) return;
+
+        // Consulta el estado real (activa/cancelada/vencida) directamente de la BD
+        Map<Integer, String> estados = obtenerEstadosPorCliente(cedula);
+
+        membresiaService.listarMembresiasCliente(cedula).forEach(m -> {
+            String estadoBD    = estados.getOrDefault(m.getIdMembresia(), "activa");
+            String estadoTexto = switch (estadoBD) {
+                case "cancelada" -> "\uD83D\uDEAB Cancelada";
+                case "vencida"   -> "❌ Vencida";
+                default          -> m.estaVigente() ? "✅ Vigente" : "❌ Vencida";
+            };
+            modeloTabla.addRow(new Object[]{
+                    m.getIdMembresia(),
+                    m.getTipo(),
+                    m.getFechaInicio().toString(),
+                    m.getFechaVencimiento().toString(),
+                    estadoTexto
+            });
+        });
+    }
+
+    /** Devuelve un mapa cm.id → estado para todos los registros del cliente. */
+    private Map<Integer, String> obtenerEstadosPorCliente(String cedula) {
+        Map<Integer, String> map = new LinkedHashMap<>();
+        String sql = "SELECT id, estado FROM cliente_membresia WHERE cedula = ?";
+        try (java.sql.PreparedStatement ps = fitclub.dao.Conexion.getInstancia().prepareStatement(sql)) {
+            ps.setString(1, cedula);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) map.put(rs.getInt("id"), rs.getString("estado"));
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("[MembresiaForm] No se pudo obtener estados: " + e.getMessage());
+        }
+        return map;
     }
 
     private void limpiarCampos() {
