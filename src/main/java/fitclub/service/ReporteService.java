@@ -78,7 +78,7 @@ public class ReporteService {
         for (Pago pago : pagos) {
             Membresia membresia = membresiaDAO.buscarPorId(pago.getIdPago());
             if (membresia != null) {
-                String tipo = membresia.getTipo().toLowerCase();
+                String tipo = membresia.getTipo().toString();
                 resultado.merge(tipo, pago.getMonto(), Double::sum);
             }
         }
